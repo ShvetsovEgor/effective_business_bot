@@ -2,3 +2,13 @@
 __pycache__/
 *.pyc
 .venv/
+node_modules/
+dist/
+coverage/
+.tools/
+/data/
+*.sqlite*
+*.db*
+.env.*
+!.env.example
+*.log
