@@ -1,4 +1,5 @@
 .env
+*.tar.gz
 .git
 .venv
 __pycache__
