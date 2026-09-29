@@ -27,3 +27,20 @@ it('После перезапуска редактирует прежний эк
     expect(repo.botScreen('1')).toEqual({ messageId: 'new-screen', pending: [] });
   } finally { repo.close(); }
 });
+it('new user text gets a reply below it; progress and final edit the new reply, duplicates do not move it',async()=>{
+ const repo=new Repository(':memory:');const bot=createBot('test-placeholder',repo);
+ const msg:Message={recipient:{chat_id:1,user_id:1,chat_type:'dialog',post_id:null},timestamp:1,body:{mid:'user-new',seq:1,text:'Привет'}};
+ const ctx=new Context({update_type:'message_created',timestamp:1,message:msg},bot.api);
+ const send=vi.spyOn(bot.api,'sendMessageToUser').mockResolvedValue({...msg,body:{...msg.body,mid:'new-below-user'}});
+ const edit=vi.spyOn(bot.api,'editMessage').mockResolvedValue({success:true});
+ const remove=vi.spyOn(bot.api,'deleteMessage').mockResolvedValue({success:true});
+ repo.saveBotScreen('1',{messageId:'old-above-user',pending:[]});const deliver=createDelivery(repo);
+ try{
+   await deliver(ctx,1,{text:'Готовлю ответ',buttons:[]},false,true);
+   expect(send).toHaveBeenCalledTimes(1);expect(edit).not.toHaveBeenCalled();expect(remove).toHaveBeenCalledWith('old-above-user');
+   await deliver(ctx,1,{text:'Ответ',buttons:[]},false);
+   await deliver(ctx,1,{text:'Ответ',buttons:[]},false,true);
+   expect(send).toHaveBeenCalledTimes(1);expect(edit).toHaveBeenLastCalledWith('new-below-user',expect.objectContaining({text:'Ответ'}));
+   expect(remove).not.toHaveBeenCalledWith('user-new');
+ }finally{repo.close();}
+});

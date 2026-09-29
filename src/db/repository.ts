@@ -72,11 +72,11 @@ export class Repository {
   saveSession(id: string, session: Session) {
     this.db.prepare('UPDATE users SET session=? WHERE id=?').run(JSON.stringify(session), id);
   }
-  botScreen(id: string): { messageId?: string; pending: string[] } {
+  botScreen(id: string): { messageId?: string; inputMessageId?: string; pending: string[] } {
     const row = this.db.prepare('SELECT data FROM bot_screens WHERE user_id=?').get(id) as JsonRow | undefined;
     return row ? JSON.parse(row.data) : { pending: [] };
   }
-  saveBotScreen(id: string, state: { messageId?: string; pending: string[] }) {
+  saveBotScreen(id: string, state: { messageId?: string; inputMessageId?: string; pending: string[] }) {
     this.db.prepare('INSERT INTO bot_screens(user_id,data) VALUES (?,?) ON CONFLICT(user_id) DO UPDATE SET data=excluded.data').run(id, JSON.stringify(state));
   }
   event(id: string, eventId: string): Screen | null {

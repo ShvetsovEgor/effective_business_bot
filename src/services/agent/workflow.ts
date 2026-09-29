@@ -25,6 +25,7 @@ export class Workflow {
     const current=this.memory.read(s.threadId).profile;
     let patch:BusinessProfile|undefined;
     const action=event.action;
+    const reviewedMarket=action==='confirm-change'&&s.detail==='market-facts'?s.marketAnalysis:null;
     if(action==='menu') s.detail='menu';
     else if(action==='reset') s.detail='reset';
     else if(action==='cancel'||action==='resume') {s.detail=null;s.pendingChange=null;s.editing=false;}
@@ -78,7 +79,10 @@ export class Workflow {
     else if(event.text) {
       let direct:BusinessProfile|undefined;
       const question=s.pendingQuestion&&questions[s.pendingQuestion];
-      if(question&&question.type!=='text'&&(!s.editing||s.detail?.startsWith('edit-field:'))) {
+      const fastText=question?.type!=='text'||s.detail?.startsWith('edit-field:')
+        ||(s.pendingQuestion==='businessIdea'&&Object.keys(current).length===0)
+        ||(s.pendingQuestion==='businessName'&&event.text.trim().split(/\s+/).length===1);
+      if(question&&fastText&&(!s.editing||s.detail?.startsWith('edit-field:'))) {
         try {direct=directAnswer(s.pendingQuestion!,event.text);} catch { /* Free text is handled by the model below. */ }
       }
       if(direct) {
@@ -102,6 +106,7 @@ export class Workflow {
         const valid=validateProfile({...current,...patch});
         // Existing values entered through buttons are confirmed by the button itself.
         s=invalidate(s,patch);
+        if(reviewedMarket)s.marketAnalysis=reviewedMarket;
         s.profileVersion=this.memory.save(s.threadId,valid);
         if(patch.legalForm==='IP') {s.currentStage='TAX_REGIME';s.detail=null;}
         syncObligations(this.memory.repo,s.threadId,valid);
@@ -159,11 +164,19 @@ export class Workflow {
       else if(s.currentStage==='NICHE') screen={text:`Идея: ${p.businessIdea}\n\nПерейдём к проверке спроса?`,buttons:[button('Да, продолжить','continue'),button('Изменить','edit'),nav]};
       else if(s.currentStage==='MARKET_ANALYSIS') {
         if(!s.marketAnalysis) {
-          const reply=await this.agent.run({threadId:s.threadId,stage:s.currentStage,profile:p,stageContext:{mode:'qualitative_market'},userMessage:'Предложи гипотезы и способы проверки идеи без статистики и правовых утверждений.',missingFields:[]});
+          // One call analyzes the idea and extracts its other explicit facts. Initial input was saved instantly.
+          const reply=await this.agent.run({threadId:s.threadId,stage:s.currentStage,profile:p,stageContext:{mode:'qualitative_market',extractFromIdea:true},userMessage:p.businessIdea??'',missingFields:ProfileFieldSchema.options.filter(key=>p[key]===undefined)});
           const m=reply.result?.marketAnalysis;
           // This guard rejects invented statistics/legal assertions; it never extracts profile facts.
           const qualitative=m&&Object.values(m).flat().every(text=>!/[\d%₽]|миллион|миллиард|налог|штраф|обязан|закон|срок подачи/i.test(text));
           s.marketAnalysis=qualitative?m:fallbackMarket;
+          const parsed=AgentResultSchema.safeParse(reply.result);
+          if(parsed.success){
+            const additions=Object.fromEntries(Object.entries(parsed.data.profilePatch).filter(([key,value])=>key!=='businessIdea'&&p[key as keyof BusinessProfile]===undefined&&value!==undefined));
+            if(Object.keys(additions).length){
+              try{validateProfile({...p,...additions});s.pendingChange=additions;s.detail='market-facts';return this.render(s);}catch{/* Discard inconsistent inferred data. */}
+            }
+          }
         }
         screen={text:`Предварительный анализ идеи — гипотезы без веб-поиска.\n\nКлиенты: ${s.marketAnalysis.customers.slice(0,2).join(' ')}\nКонкуренты: ${s.marketAnalysis.competitors.slice(0,1).join(' ')}\nКаналы: ${s.marketAnalysis.channels.slice(0,1).join(' ')}\nРиски: ${s.marketAnalysis.risks.slice(0,1).join(' ')}\nПроверить: ${s.marketAnalysis.checks.slice(0,1).join(' ')}`,buttons:[button('Принять и продолжить','continue'),button('Уточнить идею','edit'),nav]};
       }

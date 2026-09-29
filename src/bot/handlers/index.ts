@@ -2,6 +2,7 @@ import type { Bot, Context } from '@maxhub/max-bot-api';
 import type { Repository } from '../../db/repository.js';
 import type { Event, Screen } from '../messages/types.js';
 import { createDelivery } from '../messages/delivery.js';
+import { withProgress } from '../messages/progress.js';
 
 export function registerHandlers(bot: Bot, navigator: { repo: Repository; handle(user:string,event:Event,eventId?:string,chat?:string):Screen|Promise<Screen> }) {
   const queues = new Map<string, Promise<void>>();
@@ -12,12 +13,24 @@ export function registerHandlers(bot: Bot, navigator: { repo: Repository; handle
     // Never expose a personal profile or financial input in group conversations.
     if (ctx.message && ctx.message.recipient.chat_type !== 'dialog') return;
     const user = String(sender.user_id);
+    const acknowledged = ctx.callback ? ctx.answerOnCallback({}).catch(() => undefined) : Promise.resolve();
     const previous = queues.get(user) ?? Promise.resolve();
     const current = previous.catch(() => undefined).then(async () => {
-      if (ctx.callback) await ctx.answerOnCallback({}).catch(() => undefined);
+      await acknowledged;
       const chat = String(ctx.message?.recipient.chat_id ?? ctx.chatId ?? sender.user_id);
-      const screen = await navigator.handle(user, event, eventId, chat);
-      await deliver(ctx, sender.user_id, screen, event.type === 'command' && ['start', 'menu'].includes(event.command));
+      let belowUser = ctx.update.update_type === 'message_created';
+      const show = async (screen:Screen,cleanHistory=false) => {
+        await deliver(ctx,sender.user_id,screen,cleanHistory,belowUser);
+        belowUser=false;
+      };
+      let screen:Screen;
+      try {
+        screen = await withProgress(async()=>navigator.handle(user, event, eventId, chat),frame=>show(frame));
+      } catch {
+        console.error('Ошибка обработки шага. Данные и ключи не выводятся.');
+        screen={text:'Не удалось подготовить ответ. Попробуйте /menu; сохранённые данные останутся.',buttons:[]};
+      }
+      await show(screen, event.type === 'command' && ['start', 'menu'].includes(event.command));
     });
     queues.set(user, current);
     try { await current; }

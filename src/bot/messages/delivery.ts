@@ -10,14 +10,16 @@ export function createDelivery(repo: Repository) {
     await delay(Math.max(0, 550 - (Date.now() - (lastMutation.get(user) ?? 0))));
     lastMutation.set(user, Date.now());
   };
-  return async (ctx: Context, userId: number, screen: Screen, cleanHistory: boolean) => {
+  return async (ctx: Context, userId: number, screen: Screen, cleanHistory: boolean, belowUser = false) => {
     const user = String(userId);
     const state = repo.botScreen(user);
     const callbackMessage = ctx.callback && ctx.message?.sender?.is_bot ? ctx.message.body.mid : undefined;
     const previous = state.messageId ?? callbackMessage;
+    const inputId = !ctx.callback ? ctx.message?.body.mid : undefined;
+    const moveBelow = belowUser && inputId !== undefined && inputId !== state.inputMessageId;
     const extra = { text: screen.text, attachments: [keyboard(screen)], notify: false };
     let edited = false;
-    if (previous) {
+    if (previous && !moveBelow) {
       await throttle(user);
       try { edited = (await ctx.api.editMessage(previous, extra)).success; }
       catch { /* Deleted or inaccessible screen: send a replacement before cleanup. */ }
@@ -29,6 +31,7 @@ export function createDelivery(repo: Repository) {
       if (previous) state.pending.push(previous);
     }
     if (callbackMessage && callbackMessage !== state.messageId) state.pending.push(callbackMessage);
+    if (belowUser && inputId) state.inputMessageId = inputId;
     // Only the bot's own messages in this private dialog; never delete user answers.
     if (cleanHistory && ctx.chatId && ctx.botInfo) {
       try {

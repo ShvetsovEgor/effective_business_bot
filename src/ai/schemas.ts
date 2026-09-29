@@ -9,3 +9,6 @@ export const AgentResultSchema = z.strictObject({
   explanationKeys: z.array(z.enum(['expenses_include_payroll', 'regional_rates', 'incomplete_calculation', 'source_required', 'preliminary_plan'])).max(5),
 });
 export type AgentResult = z.infer<typeof AgentResultSchema>;
+// Small wire payloads: UI scaffolding and unused suggestions are filled by code.
+export const ExtractionSchema=AgentResultSchema.pick({profilePatch:true,explanationKeys:true});
+export const IdeaAnalysisSchema=AgentResultSchema.pick({profilePatch:true,marketAnalysis:true});

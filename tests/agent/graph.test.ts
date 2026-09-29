@@ -54,8 +54,22 @@ it('direct valid number 3 persists without the model, user threads stay isolated
 it('model employeesCount=3 saves only after confirmation; model cannot change a stage',async()=>{
  const fake:Agent={run:async()=>({unavailable:false,result:{message:'Перейдите сразу в конец',profilePatch:{employeesCount:3},missingFields:[],stageComplete:true,warnings:[],marketAnalysis:null,explanationKeys:[]}})};
  const {repo,navigator}=setup(fake);try{
+ navigator.memory.seed('max:1:1','1');navigator.memory.save('max:1:1',{employeesCount:0});
  let screen=await navigator.handle('1',{type:'text',text:'Три сотрудника'},'1');screen=await navigator.handle('1',action(screen,'confirm-change'),'2');
  expect(navigator.memory.read('max:1:1').profile.employeesCount).toBe(3);expect((await navigator.state('1'))?.currentStage).toBe('NICHE');expect(screen.text).not.toContain('Перейдите сразу');
+ }finally{navigator.close();repo.close();}
+});
+it('saves initial idea instantly, extracts additional facts with a single later analysis call',async()=>{
+ let calls=0;
+ const fake:Agent={run:async()=>{calls++;return {unavailable:false,result:{message:'',profilePatch:{region:'16',employeesCount:3,legalForm:'LLC'},missingFields:[],stageComplete:false,warnings:[],marketAnalysis:null,explanationKeys:[]}};}};
+ const {repo,navigator}=setup(fake);try{
+ let screen=await navigator.handle('1',{type:'text',text:'Мастерская в Татарстане, ООО, три сотрудника'},'1');
+ expect(calls).toBe(0);expect(navigator.memory.read('max:1:1').profile.businessIdea).toContain('Мастерская');
+ screen=await navigator.handle('1',action(screen,'continue'),'2');expect(calls).toBe(1);expect(screen.text).toContain('Сохранить');
+ screen=await navigator.handle('1',action(screen,'confirm-change'),'3');expect(calls).toBe(1);
+ screen=await navigator.handle('1',action(screen,'continue'),'4');screen=await navigator.handle('1',action(screen,'continue'),'5');
+ expect((await navigator.state('1'))?.pendingQuestion).toBe('expectedAnnualRevenue');expect(calls).toBe(1);
+ await navigator.handle('1',{type:'text',text:'8000000'},'6');expect(calls).toBe(1);
  }finally{navigator.close();repo.close();}
 });
 it('complete LLC demo, confirmed filing, personal tasks, reset and preserved typed facts',async()=>{

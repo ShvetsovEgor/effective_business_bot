@@ -23,7 +23,18 @@ export const missing = (stage:Stage,p:BusinessProfile) => required(stage,p).filt
 export function directAnswer(key: ProfileField, raw: string): BusinessProfile {
   if(key==='businessIdea') return ProfileSchema.parse({businessIdea:raw});
   const q=questions[key]; if(!q) throw new Error('UNKNOWN_QUESTION');
-  const input=key==='region' && ['татарстан','республика татарстан'].includes(raw.toLowerCase()) ? '16' : raw;
+  const normalized=raw.trim().toLowerCase();
+  let input=key==='region' && ['татарстан','республика татарстан'].includes(normalized) ? '16' : raw;
+  if(q.options){
+    const aliases:Record<string,string>={'да':'yes','нет':'no','ооо':'LLC','ип':'IP','не знаю':q.options.some(([,value])=>value==='unknown')?'unknown':'no'};
+    const option=q.options.find(([label])=>label.toLowerCase()===normalized)?.[1]??aliases[normalized];
+    if(option&&q.options.some(([,value])=>value===option))input=option;
+  }
+  // A single explicit amount, not an attempt to extract fields from arbitrary prose.
+  if(q.type==='money'){
+    const amount=normalized.match(/^(\d+(?:[.,]\d+)?)\s*(тыс\.?|тысяч(?:а|и)?|млн\.?|миллион(?:а|ов)?)\s*(?:₽|руб\.?)?$/);
+    if(amount)input=String(Number(amount[1]!.replace(',','.'))*(amount[2]!.startsWith('т')?1000:1000000));
+  }
   return ProfileSchema.parse({[key]:parseAnswer(q,input)});
 }
 export const labels = (p:BusinessProfile) => Object.entries(p).map(([k,v])=>`${({businessIdea:'Идея',businessName:'Название',region:'Регион',legalForm:'Форма',registrationStatus:'Статус регистрации',employeesCount:'Сотрудники',expectedAnnualRevenue:'Доход за год',expectedAnnualExpenses:'Расходы за год',annualPayroll:'ФОТ за год',fixedAssetsValue:'Основные средства',taxRegime:'Режим',registrationDate:'Дата регистрации',contributions:'Взносы'} as Record<string,string>)[k]??questions[k as ProfileField]?.text.split('?')[0]??k}: ${v===true?'да':v===false?'нет':v===null?'неизвестно':v}`).join('\n');
