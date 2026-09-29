@@ -7,6 +7,7 @@ import type { TaxInput, TaxResult } from '../domain/tax/types.js';
 import type { Screen } from '../bot/messages/types.js';
 
 export interface Session {
+  screen?: Screen;
   nonce: string;
   actions: string[];
   form?: 'profile' | 'tax' | 'transition';
@@ -51,6 +52,9 @@ export class Repository {
         user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         event_id TEXT NOT NULL, response TEXT NOT NULL, PRIMARY KEY(user_id,event_id)
       );
+      CREATE TABLE IF NOT EXISTS bot_screens (
+        user_id TEXT PRIMARY KEY, data TEXT NOT NULL
+      );
       PRAGMA user_version = 1;
     `);
   }
@@ -67,6 +71,13 @@ export class Repository {
   }
   saveSession(id: string, session: Session) {
     this.db.prepare('UPDATE users SET session=? WHERE id=?').run(JSON.stringify(session), id);
+  }
+  botScreen(id: string): { messageId?: string; pending: string[] } {
+    const row = this.db.prepare('SELECT data FROM bot_screens WHERE user_id=?').get(id) as JsonRow | undefined;
+    return row ? JSON.parse(row.data) : { pending: [] };
+  }
+  saveBotScreen(id: string, state: { messageId?: string; pending: string[] }) {
+    this.db.prepare('INSERT INTO bot_screens(user_id,data) VALUES (?,?) ON CONFLICT(user_id) DO UPDATE SET data=excluded.data').run(id, JSON.stringify(state));
   }
   event(id: string, eventId: string): Screen | null {
     const row = this.db.prepare('SELECT response AS data FROM processed_events WHERE user_id=? AND event_id=?').get(id, eventId) as JsonRow | undefined;
@@ -105,8 +116,8 @@ export class Repository {
     });
   }
   setStatus(id: string, taskId: string, status: Status) {
-    this.db.prepare('UPDATE tasks SET status=?,completion_date=? WHERE user_id=? AND id=? AND active=1')
-      .run(status, status === 'DONE' ? new Date().toISOString() : null, id, taskId);
+    this.db.prepare('UPDATE tasks SET status=?,completion_date=? WHERE user_id=? AND id=? AND active=1 AND status<>?')
+      .run(status, status === 'DONE' ? new Date().toISOString() : null, id, taskId, status);
   }
   saveCalculation(id: string, input: TaxInput, result: TaxResult[]) {
     this.db.prepare('INSERT INTO tax_calculations(user_id,year,input,result) VALUES (?,2026,?,?)').run(id, JSON.stringify(input), JSON.stringify(result));

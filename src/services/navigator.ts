@@ -25,7 +25,7 @@ export class Navigator {
       this.repo.ensureUser(user);
       if (eventId) {
         const existing = this.repo.event(user, eventId);
-        if (existing) return existing;
+        if (existing) return this.repo.session(user).screen ?? existing;
       }
       let session = this.repo.session(user);
       let screen: Screen;
@@ -43,16 +43,18 @@ export class Navigator {
         const nonce = event.payload.slice(0, colon);
         const value = event.payload.slice(colon + 1);
         if (colon < 0 || nonce !== session.nonce || !session.actions.includes(value)) {
-          screen = session.form ? this.question(session, 'Эта кнопка устарела. Продолжим с текущего вопроса.')
-            : { text: 'Эта кнопка уже обработана или устарела. Откройте актуальный экран.', buttons: [action('📋 Мои задачи', 'tasks'), menuButton()] };
+          // An old click must not invalidate the keyboard currently visible to the user.
+          if (session.screen) return session.screen;
+          screen = session.form ? this.question(session) : this.menu();
         } else ({ screen, session } = this.callback(user, value, session));
       } else if (session.form) ({ screen, session } = this.answer(user, event.text, session));
       else screen = { text: 'Выберите действие в меню.', buttons: [menuButton()] };
       const nonce = randomBytes(6).toString('hex');
       session.nonce = nonce;
       session.actions = screen.buttons.flatMap(b => 'action' in b ? [b.action] : []);
-      this.repo.saveSession(user, session);
       const response = { ...screen, buttons: screen.buttons.map(b => 'action' in b ? { ...b, action: `${nonce}:${b.action}` } : b) };
+      session.screen = response;
+      this.repo.saveSession(user, session);
       if (eventId) this.repo.saveEvent(user, eventId, response);
       return response;
     });

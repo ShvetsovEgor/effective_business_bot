@@ -3,6 +3,7 @@ import { Context } from '@maxhub/max-bot-api';
 import type { Message, Update } from '@maxhub/max-bot-api/types';
 import { Repository } from '../src/db/repository.js';
 import { createBot } from '../src/bot/create-bot.js';
+import { AgentNavigator } from '../src/services/agent-navigator.js';
 
 const sender = { user_id: 42, first_name: 'Test', name: 'Test', username: null, is_bot: false, last_activity_time: 0 };
 const message: Message = { sender, recipient: { chat_id: 42, user_id: 42, chat_type: 'dialog', post_id: null }, timestamp: 1, body: { mid: 'm1', seq: 1, text: '/start' } };
@@ -11,6 +12,7 @@ it('Официальный SDK: /start, inline callback, ack, сохранени
   const bot = createBot('test-placeholder', repo);
   const send = vi.spyOn(bot.api, 'sendMessageToUser').mockResolvedValue(message);
   const ack = vi.spyOn(bot.api, 'answerOnCallback').mockResolvedValue({ success: true });
+  const edit = vi.spyOn(bot.api, 'editMessage').mockResolvedValue({ success: true });
   const dispatch = (update: Update) => bot.middleware()(new Context(update, bot.api), async () => undefined);
   try {
     await dispatch({ update_type: 'message_created', timestamp: 1, message });
@@ -21,9 +23,27 @@ it('Официальный SDK: /start, inline callback, ack, сохранени
     if (button.type !== 'callback') throw new Error('Missing callback');
     await dispatch({ update_type: 'message_callback', timestamp: 2, callback: { timestamp: 2, callback_id: 'c1', user: sender, payload: button.payload }, message });
     expect(ack).toHaveBeenCalledWith('c1', {});
-    expect(send.mock.calls[1]![1]).toContain('Шаг 1 из 10');
+    expect(edit.mock.calls[0]![1]!.text).toContain('Шаг 1 из 10');
+    expect(send).toHaveBeenCalledTimes(1);
     expect(repo.tasks('42')).toHaveLength(10);
     await dispatch({ update_type: 'message_created', timestamp: 3, message: { ...message, body: { ...message.body, mid: 'group' }, recipient: { ...message.recipient, chat_type: 'chat' } } });
-    expect(send).toHaveBeenCalledTimes(2);
+    expect(send).toHaveBeenCalledTimes(1);
   } finally { repo.close(); }
+});
+it('MAX adapter awaits the persistent graph and uses chat+user identity',async()=>{
+  const repo=new Repository(':memory:');const navigator=new AgentNavigator(repo,':memory:',{run:async()=>({result:null,unavailable:true})});
+  const bot=createBot('test-placeholder',repo,undefined,navigator);
+  const send=vi.spyOn(bot.api,'sendMessageToUser').mockResolvedValue(message);
+  const edit=vi.spyOn(bot.api,'editMessage').mockResolvedValue({success:true});
+  vi.spyOn(bot.api,'answerOnCallback').mockResolvedValue({success:true});
+  const dispatch=(update:Update)=>bot.middleware()(new Context(update,bot.api),async()=>undefined);
+  try{
+    await dispatch({update_type:'message_created',timestamp:1,message});
+    expect(send.mock.calls[0]?.[1]).toContain('Какой бизнес');
+    const s=await navigator.state('42','42');const b=s!.screen.buttons.find(b=>'action'in b&&b.action.endsWith('|menu'))!;
+    if(!('action'in b))throw new Error('No callback');
+    await dispatch({update_type:'message_callback',timestamp:2,callback:{timestamp:2,callback_id:'graph-c1',user:sender,payload:b.action},message});
+    expect(edit.mock.calls[0]?.[1]?.text).toContain('Что нужно сделать сейчас');expect(send).toHaveBeenCalledTimes(1);
+    expect((await navigator.state('42','42'))?.threadId).toBe('max:42:42');
+  }finally{navigator.close();repo.close();}
 });

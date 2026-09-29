@@ -46,6 +46,15 @@ it('Повторный callback не завершает следующую за�
   expect(repo.tasks('1').filter(t => t.status === 'DONE')).toHaveLength(1);
   expect(repo.tasks('2')).toEqual([]);
 });
+it('Старая кнопка не инвалидирует текущую; повтор события возвращает актуальный экран', () => {
+  const first = press(start(), 'registration');
+  const event = { type: 'callback', payload: payload(first, 'status:reg-1:DONE') } as const;
+  const second = nav.handle('1', event, 'done-first');
+  expect(nav.handle('1', event)).toEqual(second);
+  const third = press(second, 'status:reg-2:DONE');
+  expect(nav.handle('1', event, 'done-first')).toEqual(third);
+  expect(press(third, 'status:reg-3:DONE').text).toContain('Шаг 4 из 10');
+});
 it('Повторная доставка текстового сообщения не сдвигает анкету', () => {
   press(start(), 'profile');
   const event = { type: 'text', text: 'Тест' } as const;

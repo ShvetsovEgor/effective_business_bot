@@ -1,10 +1,11 @@
 import type { Bot, Context } from '@maxhub/max-bot-api';
-import type { Navigator } from '../../services/navigator.js';
-import type { Event } from '../messages/types.js';
-import { keyboard } from '../keyboards/index.js';
+import type { Repository } from '../../db/repository.js';
+import type { Event, Screen } from '../messages/types.js';
+import { createDelivery } from '../messages/delivery.js';
 
-export function registerHandlers(bot: Bot, navigator: Navigator) {
+export function registerHandlers(bot: Bot, navigator: { repo: Repository; handle(user:string,event:Event,eventId?:string,chat?:string):Screen|Promise<Screen> }) {
   const queues = new Map<string, Promise<void>>();
+  const deliver = createDelivery(navigator.repo);
   const dispatch = async (ctx: Context, event: Event, eventId?: string) => {
     const sender = ctx.callback?.user ?? ctx.message?.sender ?? ctx.user;
     if (!sender || sender.is_bot) return;
@@ -14,8 +15,9 @@ export function registerHandlers(bot: Bot, navigator: Navigator) {
     const previous = queues.get(user) ?? Promise.resolve();
     const current = previous.catch(() => undefined).then(async () => {
       if (ctx.callback) await ctx.answerOnCallback({}).catch(() => undefined);
-      const screen = navigator.handle(user, event, eventId);
-      await ctx.api.sendMessageToUser(sender.user_id, screen.text, { attachments: [keyboard(screen)] });
+      const chat = String(ctx.message?.recipient.chat_id ?? ctx.chatId ?? sender.user_id);
+      const screen = await navigator.handle(user, event, eventId, chat);
+      await deliver(ctx, sender.user_id, screen, event.type === 'command' && ['start', 'menu'].includes(event.command));
     });
     queues.set(user, current);
     try { await current; }
