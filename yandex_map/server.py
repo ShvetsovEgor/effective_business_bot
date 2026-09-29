@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import sys
 import threading
 import urllib.error
@@ -38,8 +39,8 @@ STATIC_TYPES = {
     ".css": "text/css; charset=utf-8",
     ".svg": "image/svg+xml",
 }
-HOST = "127.0.0.1"
-PORT = 8766
+HOST = os.environ.get("HOST", "127.0.0.1")
+PORT = int(os.environ.get("PORT", "8766"))
 MAX_BODY = 200_000
 
 log = logging.getLogger(__name__)

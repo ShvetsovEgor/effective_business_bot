@@ -68,9 +68,12 @@
     }
     #intro.leaving .intro-bg { opacity: 0; }
     .intro-wrap { position: relative; width: 520px; max-width: calc(100vw - 32px); padding: 16px; }
-    .intro-title, .intro-sub { transition: opacity .4s ease, transform .55s cubic-bezier(.4,0,.2,1); }
+    .intro-user, .intro-title, .intro-sub { transition: opacity .4s ease, transform .55s cubic-bezier(.4,0,.2,1); }
+    #intro.leaving .intro-user,
     #intro.leaving .intro-title,
     #intro.leaving .intro-sub { opacity: 0; transform: translate(-36px, -20px); }
+    .intro-user { color: #fff; text-align: center; font-size: 15px; font-weight: 600; margin: 0 0 10px; text-shadow: 0 1px 8px rgba(0,0,0,.25); }
+    .intro-user[hidden] { display: none; }
     .intro-title { color: #fff; text-align: center; font-size: 26px; font-weight: 700; margin: 0 0 6px; text-shadow: 0 2px 16px rgba(0,0,0,.25); }
     .intro-sub { color: rgba(255,255,255,.85); text-align: center; font-size: 14px; margin: 0 0 18px; text-shadow: 0 1px 8px rgba(0,0,0,.2); }
     .pbox.flying {
@@ -154,6 +157,7 @@
 <div id="intro">
   <div class="intro-bg"></div>
   <div class="intro-wrap">
+    <p class="intro-user" id="intro-user" hidden></p>
     <h2 class="intro-title">Где открыть бизнес в Казани</h2>
     <p class="intro-sub">Опишите формат, бюджет, площадь и районы — подберём места на карте</p>
     <div class="pbox" id="pbox">
@@ -193,6 +197,7 @@
 <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 <script type="module" src="/panel.js?v=gap"></script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://st.max.ru/js/max-web-app.js"></script>
 <script>
   lucide.createIcons();
 
@@ -339,7 +344,28 @@
     else startRecording();
   });
 
+  function maxUserName() {
+    const user = window.WebApp && window.WebApp.initDataUnsafe && window.WebApp.initDataUnsafe.user;
+    if (!user) return "";
+    const full = [user.first_name, user.last_name].map((part) => (part || "").trim()).filter(Boolean).join(" ");
+    return full || (user.username || "").trim();
+  }
+
+  function showMaxUser() {
+    try {
+      if (window.WebApp && typeof window.WebApp.ready === "function") window.WebApp.ready();
+    } catch (error) {
+      console.warn(error);
+    }
+    const name = maxUserName();
+    const node = document.getElementById("intro-user");
+    if (!name || !node) return;
+    node.textContent = `Здравствуйте, ${name}`;
+    node.hidden = false;
+  }
+
   refreshSend();
+  showMaxUser();
   ptext.focus();
 </script>
 </body>

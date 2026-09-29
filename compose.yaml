@@ -1,0 +1,20 @@
+services:
+  web:
+    build: .
+    ports:
+      - "80:80"
+    env_file:
+      - .env
+    environment:
+      HOST: 0.0.0.0
+      PORT: "80"
+    restart: unless-stopped
+
+  bot:
+    build: .
+    command: ["python", "-u", "bot.py"]
+    env_file:
+      - .env
+    profiles:
+      - bot
+    restart: unless-stopped
