@@ -1,8 +1,9 @@
-"""Новостной фон адреса и вывод о целесообразности открытия.
+"""Новостной фон места и вывод о целесообразности открытия.
 
-Нейропоиск ищет новости об улице и районе, затем модель Alice сводит
-новости, конкурентов и финансовую модель в короткий вывод. Если нейропоиск
-не ответил, вывод строится без новостей, и это видно в поле `news_error`.
+Нейропоиск ищет новости по ближайшему пересечению улиц, а не по номеру дома,
+затем модель Alice сводит новости, конкурентов и финансовую модель в короткий
+вывод. Если нейропоиск не ответил, вывод строится без новостей, и это видно
+в поле `news_error`.
 """
 
 from __future__ import annotations
@@ -10,6 +11,7 @@ from __future__ import annotations
 import json
 import logging
 
+from analysis.crossing import place_for_news
 from llm import complete_json
 from neurosearch import analyze_address
 
@@ -19,7 +21,8 @@ VERDICTS = ("подходит", "осторожно", "не брать")
 
 INSTRUCTIONS = """Ты помогаешь предпринимателю решить, открывать ли бизнес по адресу в Казани.
 На входе JSON: описание бизнеса, помещение, модельная проходимость, конкуренты из Яндекса,
-модельная экономика и новостная сводка по улице и району.
+модельная экономика и новостная сводка. Сводка собрана по пересечению улиц рядом с точкой,
+не по номеру дома.
 Верни только JSON без markdown:
 {"verdict": "подходит" | "осторожно" | "не брать",
  "summary": "2–3 предложения, главный вывод",
@@ -80,17 +83,20 @@ def _facts(brief: dict, place: dict, news: str) -> dict:
             )
         },
         "rule_verdict": place.get("verdict"),
+        "news_place": place.get("news_place"),
         "news": news[:3500],
     }
 
 
 def district_insight(brief: dict, place: dict) -> dict:
     address = f"{place['address']}, {place['district']} район"
+    news_place = place_for_news(place["lat"], place["lon"], place.get("address") or "", place.get("district") or "")
+    place = {**place, "news_place": news_place}
     news_text = ""
     sources = []
     news_error = None
     try:
-        news = analyze_address(address, business=brief.get("business_type") or "")
+        news = analyze_address(news_place, business=brief.get("business_type") or "")
         news_text = news.text
         sources = [
             {"title": item.title, "url": item.url, "used": item.used}
@@ -119,6 +125,7 @@ def district_insight(brief: dict, place: dict) -> dict:
     return {
         "id": place["id"],
         "address": address,
+        "news_place": news_place,
         "verdict": verdict,
         "news_text": news_text,
         "sources": sources,

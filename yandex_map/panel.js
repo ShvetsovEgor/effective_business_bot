@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { createPortal } from "react-dom";
 import { html } from "htm/react";
 import {
   Avatar,
@@ -31,14 +32,14 @@ const resultLayer = L.layerGroup().addTo(map);
 const competitorLayer = L.layerGroup().addTo(map);
 const markers = {};
 
-const legend = L.control({ position: "bottomright" });
+const legend = L.control({ position: "bottomleft" });
 legend.onAdd = () => {
   const box = L.DomUtil.create("div", "legend");
   box.innerHTML = `
     <div><b>Тепловая карта</b> — пешеходы в сутки по гексагонам Яндекс Геоаналитики</div>
     <div><i style="background:#9aa3af"></i>модельные объявления (симуляция)</div>
     <div><i style="background:#1f6feb"></i>топ-5 мест</div>
-    <div><i style="background:#e5484d"></i>конкуренты из Яндекса</div>`;
+    <div><i class="org-swatch"></i>конкуренты из Яндекса</div>`;
   return box;
 };
 legend.addTo(map);
@@ -80,7 +81,13 @@ function verdictColor(value) {
 function showCompetitors(place) {
   competitorLayer.clearLayers();
   for (const org of place.competitors) {
-    L.circleMarker([org.lat, org.lon], { radius: 6, color: "#b42318", fillColor: "#e5484d", fillOpacity: 0.9, weight: 1 })
+    const icon = L.divIcon({
+      className: "",
+      html: `<div class="org-icon${org.chain ? " chain" : ""}">${initials(org.name)}</div>`,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+    });
+    L.marker([org.lat, org.lon], { icon, zIndexOffset: 600 })
       .bindPopup(`<b>${esc(org.name)}</b>${org.chain ? " · сеть" : ""}<br>${esc(org.address)}<br>${esc(org.categories.join(", "))}<br>${esc(org.hours)}<br>${org.distance_m} м от помещения`)
       .addTo(competitorLayer);
   }
@@ -140,7 +147,7 @@ function BulletCells({ overline, items }) {
 
 function InsightBlock({ insight, open, newsOpen, onToggle, onToggleNews }) {
   if (!insight) {
-    return html`<${CellSimple} height="compact" title="Ищу новости района и готовлю вывод…" subtitle="Нейропоиск по адресу" />`;
+    return html`<${CellSimple} height="compact" title="Ищу новости района и готовлю вывод…" subtitle="Нейропоиск по пересечению улиц" />`;
   }
   if (insight.error) {
     return html`<${CellSimple} height="compact" title="Вывод не получен" subtitle=${insight.error} />`;
@@ -155,7 +162,9 @@ function InsightBlock({ insight, open, newsOpen, onToggle, onToggleNews }) {
       <${BulletCells} overline="Риски" items=${verdict.risks} />
       <${BulletCells} overline="Из новостей" items=${verdict.news_factors} />
       ${insight.news_text ? html`
-        <${CellAction} mode="secondary" showChevron onClick=${onToggleNews}>Новостная сводка по району<//>
+        <${CellAction} mode="secondary" showChevron onClick=${onToggleNews}>
+          Новостная сводка: ${insight.news_place || "пересечение улиц рядом"}
+        <//>
         ${newsOpen ? html`
           <${CellSimple} title=${insight.news_text} />
           ${sources.map((source) => html`
@@ -167,11 +176,8 @@ function InsightBlock({ insight, open, newsOpen, onToggle, onToggleNews }) {
   `;
 }
 
-function PlaceCard({ place, active, expanded, insight, open, newsOpen, onFocus, onToggleCard, onToggle, onToggleNews }) {
+function PlaceCard({ place, active, insight, onOpen }) {
   const shownVerdict = insight?.verdict?.verdict || place.verdict;
-  const competition = place.competition;
-  const nearby = Object.entries(place.footfall.nearby).map(([name, count]) => `${name}: ${count}`).join(", ");
-  const scores = `Поток ${Math.round(place.scores.footfall * 100)} · экономика ${Math.round(place.scores.finance * 100)} · конкуренция ${Math.round(place.scores.competition * 100)} · соответствие ${Math.round(place.scores.fit * 100)}`;
   return html`
     <div className=${active ? "place-card active" : "place-card"} id=${`place-${place.id}`}>
       <${CellList} mode="island" filled>
@@ -182,16 +188,42 @@ function PlaceCard({ place, active, expanded, insight, open, newsOpen, onFocus, 
           before=${html`<${RankAvatar} rank=${place.rank} />`}
           after=${html`<${Verdict} value=${shownVerdict} />`}
           showChevron
-          onClick=${() => { onToggleCard(); if (!expanded) onFocus(place); }} />
-        ${expanded ? html`
-        <${CellSimple} height="compact" title=${scores} />
-        ${place.flags.length ? html`<${CellSimple} height="compact" overline="Оговорки" title=${place.flags.join("; ")} />` : null}
-        <${CellAction} mode="secondary" showChevron onClick=${() => onToggle("finance")}>Финансовая модель: проходимость × аренда<//>
-        ${open.finance ? html`<${FinanceRows} place=${place} />` : null}
-        <${CellAction} mode="secondary" showChevron onClick=${() => onToggle("competitors")}>
-          Конкуренты: ${competition.count} в ${competition.radius_m} м${competition.nearest_m == null ? "" : `, ближайший ${competition.nearest_m} м`}
+          onClick=${() => onOpen(place)} />
+      <//>
+    </div>
+  `;
+}
+
+function DetailCard({ place, insight, onClose }) {
+  const [newsOpen, setNewsOpen] = useState(false);
+  const [insightOpen, setInsightOpen] = useState(true);
+  const shownVerdict = insight?.verdict?.verdict || place.verdict;
+  const competition = place.competition;
+  const nearby = Object.entries(place.footfall.nearby).map(([name, count]) => `${name}: ${Number(count).toLocaleString("ru-RU")}`).join(", ");
+  const scores = `Поток ${Math.round(place.scores.footfall * 100)} · экономика ${Math.round(place.scores.finance * 100)} · конкуренция ${Math.round(place.scores.competition * 100)} · соответствие ${Math.round(place.scores.fit * 100)}`;
+  return html`
+    <${MaxUI} platform="ios" colorScheme="light">
+      <${Panel} mode="primary">
+        <${Container}>
+          <${Flex} align="center" justify="space-between" gap=${8} style=${{ padding: "12px 0 4px" }}>
+            <${Typography.Headline} variant="small">Аналитика места<//>
+            <${Button} size="small" variant="secondary" onClick=${onClose}>Закрыть<//>
+          <//>
         <//>
-        ${open.competitors ? html`
+        <${CellList} mode="island" filled>
+          <${CellSimple}
+            title=${place.title}
+            subtitle=${`${place.address}, ${place.district} район`}
+            overline=${`Балл ${Math.round(place.scores.total * 100)}`}
+            before=${html`<${RankAvatar} rank=${place.rank} />`}
+            after=${html`<${Verdict} value=${shownVerdict} />`} />
+          <${CellSimple} height="compact" title=${scores} />
+          ${place.flags.length ? html`<${CellSimple} height="compact" overline="Оговорки" title=${place.flags.join("; ")} />` : null}
+          <${CellHeader}>Финансовая модель<//>
+          <${FinanceRows} place=${place} />
+          <${CellHeader}>
+            Конкуренты: ${competition.count} в ${competition.radius_m} м${competition.nearest_m == null ? "" : `, ближайший ${competition.nearest_m} м`}
+          <//>
           ${competition.notes.map((note) => html`<${CellSimple} key=${note} height="compact" title=${note} />`)}
           ${place.competitors.length
             ? place.competitors.slice(0, 8).map((org, index) => html`
@@ -201,17 +233,12 @@ function PlaceCard({ place, active, expanded, insight, open, newsOpen, onFocus, 
                   subtitle=${`${org.distance_m} м · ${org.categories.join(", ")}${org.hours ? ` · ${org.hours}` : ""}`} />
               `)
             : html`<${CellSimple} height="compact" title="Конкурентов в радиусе не найдено" />`}
-        ` : null}
-        <${CellAction} mode="secondary" showChevron onClick=${() => onToggle("footfall")}>
-          Пешеходы: ${place.footfall.pedestrians_day.toLocaleString("ru-RU")} в сутки
+          <${CellHeader}>Пешеходы: ${place.footfall.pedestrians_day.toLocaleString("ru-RU")} в сутки<//>
+          <${CellSimple} height="compact" title=${`${nearby || "Гексагон без данных о потоке"}${place.metro ? `. Метро: ${place.metro}.` : ""}`} />
+          <${InsightBlock} insight=${insight} open=${insightOpen} newsOpen=${newsOpen} onToggle=${() => setInsightOpen((value) => !value)} onToggleNews=${() => setNewsOpen((value) => !value)} />
         <//>
-        ${open.footfall ? html`
-          <${CellSimple} height="compact" title=${nearby || "Гексагон без данных о потоке"}${place.metro ? `. Метро: ${place.metro}` : ""} />
-        ` : null}
-        <${InsightBlock} insight=${insight} open=${open.insight} newsOpen=${newsOpen} onToggle=${() => onToggle("insight")} onToggleNews=${onToggleNews} />
-        ` : null}
       <//>
-    </div>
+    <//>
   `;
 }
 
@@ -251,7 +278,6 @@ function App() {
   const [payload, setPayload] = useState(null);
   const [insights, setInsights] = useState({});
   const [activeId, setActiveId] = useState(null);
-  const [open, setOpen] = useState({});
   const [showJson, setShowJson] = useState(false);
 
   async function run(raw) {
@@ -259,7 +285,8 @@ function App() {
     setText(query);
     setBusy(true);
     setInsights({});
-    setOpen({});
+    setActiveId(null);
+    competitorLayer.clearLayers();
     setStatus("Разбираю описание, ищу конкурентов и считаю экономику…");
     try {
       const response = await fetch("/api/analyze", {
@@ -280,18 +307,17 @@ function App() {
 
   function focusPlace(place) {
     setActiveId(place.id);
-    map.flyTo([place.lat, place.lon], 16, { duration: 0.6 });
+    const zoom = 16;
+    const shifted = map.project([place.lat, place.lon], zoom).add([180, 0]);
+    map.flyTo(map.unproject(shifted, zoom), zoom, { duration: 0.6 });
     markers[place.id]?.openPopup();
     showCompetitors(place);
   }
 
-  function toggle(id, section) {
-    const key = `${id}:${section}`;
-    setOpen((current) => {
-      const previous = current[key];
-      const wasOpen = Boolean(previous);
-      return { ...current, [key]: !wasOpen };
-    });
+  function closeDetail() {
+    setActiveId(null);
+    competitorLayer.clearLayers();
+    map.closePopup();
   }
 
   useEffect(() => {
@@ -354,9 +380,7 @@ function App() {
       markers[place.id] = L.marker([place.lat, place.lon], { icon, zIndexOffset: 1000 })
         .bindPopup(`<b>${place.rank}. ${esc(place.title)}</b><br>${esc(place.address)}<br>Прибыль (модель): ${rub(place.finance.profit_month)}/мес`)
         .on("click", () => {
-          setActiveId(place.id);
-          map.flyTo([place.lat, place.lon], 16, { duration: 0.6 });
-          showCompetitors(place);
+          focusPlace(place);
           document.getElementById(`place-${place.id}`)?.scrollIntoView({ behavior: "smooth", block: "nearest" });
         })
         .addTo(resultLayer);
@@ -384,7 +408,8 @@ function App() {
     return () => { cancelled = true; };
   }, [payload]);
 
-  const sectionOpen = (id, section) => Boolean(open[`${id}:${section}`]);
+  const activePlace = payload?.top.find((place) => place.id === activeId) || null;
+  const detailRoot = document.getElementById("detail");
 
   return html`
     <${MaxUI} platform="ios" colorScheme="light">
@@ -415,20 +440,16 @@ function App() {
                 key=${place.id}
                 place=${place}
                 active=${place.id === activeId}
-                expanded=${Boolean(open[`${place.id}:card`])}
                 insight=${insights[place.id]}
-                newsOpen=${Boolean(open[`${place.id}:news`])}
-                open=${{
-                  finance: sectionOpen(place.id, "finance"),
-                  competitors: sectionOpen(place.id, "competitors"),
-                  footfall: sectionOpen(place.id, "footfall"),
-                  insight: sectionOpen(place.id, "insight"),
-                }}
-                onFocus=${focusPlace}
-                onToggleCard=${() => toggle(place.id, "card")}
-                onToggle=${(section) => toggle(place.id, section)}
-                onToggleNews=${() => toggle(place.id, "news")} />
+                onOpen=${focusPlace} />
             `)}
+            ${activePlace && detailRoot ? createPortal(html`
+              <${DetailCard}
+                key=${activePlace.id}
+                place=${activePlace}
+                insight=${insights[activePlace.id]}
+                onClose=${closeDetail} />
+            `, detailRoot) : null}
             <${Container}>
               ${Object.values(payload.notices).map((note) => html`
                 <${Typography.Text} key=${note.slice(0, 24)} variant="note" color="tertiary">${note}<//>

@@ -12,6 +12,7 @@
     "imports": {
       "react": "https://esm.sh/react@19.2.8",
       "react/jsx-runtime": "https://esm.sh/react@19.2.8/jsx-runtime",
+      "react-dom": "https://esm.sh/react-dom@19.2.8",
       "react-dom/client": "https://esm.sh/react-dom@19.2.8/client",
       "htm/react": "https://esm.sh/htm@3.1.1/react?external=react",
       "@maxhub/max-ui": "https://unpkg.com/@maxhub/max-ui@0.5.0/dist/index.js"
@@ -27,11 +28,26 @@
     #panel .sidebar-field textarea { display: block; width: 100%; max-width: 100%; box-sizing: border-box; }
     #map { flex: 1; }
     .muted { color: #667085; font-size: 12px; }
-    .place-card { border-radius: 16px; }
-    .place-card.active { box-shadow: inset 0 0 0 2px var(--text-themed, #007aff); }
+    .place-card.active [class*="CellList__body"] { background-color: #d6e8ff; }
+    #detail {
+      position: fixed; top: 16px; right: 16px; bottom: 16px; width: 400px;
+      max-width: min(400px, calc(100vw - 32px)); z-index: 900; overflow: auto;
+      border-radius: 20px; box-shadow: 0 16px 48px rgba(0,0,0,.22);
+      background: var(--background-surface, #edeef2);
+    }
+    #detail:empty { display: none; }
     .legend { background: #fff; padding: 8px 10px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.12); font-size: 12px; max-width: 260px; }
     .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
     .num-icon { background: #1f6feb; color: #fff; border: 2px solid #fff; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+    .org-icon {
+      box-sizing: border-box; width: 32px; height: 32px; border-radius: 50%;
+      background: #fff; color: #9f1239; border: 3px solid #e11d48;
+      display: flex; align-items: center; justify-content: center;
+      font: 700 12px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      box-shadow: 0 0 0 2px #fff, 0 2px 8px rgba(0,0,0,.45);
+    }
+    .org-icon.chain { background: #e11d48; color: #fff; }
+    .legend i.org-swatch { background: #fff; border: 2px solid #e11d48; box-sizing: border-box; }
     .leaflet-control-attribution { max-width: 320px; font-size: 11px; }
 
     /* ---- Первый экран: prompt box на градиенте ---- */
@@ -146,12 +162,13 @@
 <div id="app">
   <aside id="panel"></aside>
   <div id="map"></div>
+  <aside id="detail"></aside>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
 <script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet/leaflet-maplibre-gl.js"></script>
 <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
-<script type="module" src="/panel.js?v=hexflow"></script>
+<script type="module" src="/panel.js?v=orgicon"></script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script>
   lucide.createIcons();
