@@ -1,0 +1,1081 @@
+{
+  "type": "FeatureCollection",
+  "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года.",
+  "city": "Казань",
+  "data_origin": "simulated",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.1162,
+          55.7889
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-001",
+        "title": "Аренда, торговое помещение, 48 м²",
+        "deal": "rent",
+        "kind": "street_retail",
+        "district": "Вахитовский",
+        "address": "Казань, улица Баумана, 42",
+        "area_m2": 48,
+        "price_per_m2": 6900,
+        "price_month": 331200,
+        "price_total": null,
+        "floor": 1,
+        "condition": "finish",
+        "power_kw": 25,
+        "separate_entrance": true,
+        "food_ready": true,
+        "line": "1",
+        "footfall": "высокая",
+        "metro": "Площадь Тукая",
+        "fit": "кофейня, пекарня",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.1134,
+          55.7904
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-002",
+        "title": "Аренда, торговое помещение, 86 м²",
+        "deal": "rent",
+        "kind": "street_retail",
+        "district": "Вахитовский",
+        "address": "Казань, улица Баумана, 58",
+        "area_m2": 86,
+        "price_per_m2": 6350,
+        "price_month": 546100,
+        "price_total": null,
+        "floor": 1,
+        "condition": "finish",
+        "power_kw": 30,
+        "separate_entrance": true,
+        "food_ready": true,
+        "line": "1",
+        "footfall": "высокая",
+        "metro": "Площадь Тукая",
+        "fit": "ресторан, магазин",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.1088,
+          55.7962
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-003",
+        "title": "Аренда, торговое помещение, 64 м²",
+        "deal": "rent",
+        "kind": "street_retail",
+        "district": "Вахитовский",
+        "address": "Казань, Кремлёвская улица, 21",
+        "area_m2": 64,
+        "price_per_m2": 6500,
+        "price_month": 416000,
+        "price_total": null,
+        "floor": 1,
+        "condition": "finish",
+        "power_kw": 20,
+        "separate_entrance": true,
+        "food_ready": true,
+        "line": "1",
+        "footfall": "высокая",
+        "metro": "Кремлёвская",
+        "fit": "кофейня, сувениры",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.1248,
+          55.7876
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-004",
+        "title": "Аренда, торговое помещение, 112 м²",
+        "deal": "rent",
+        "kind": "street_retail",
+        "district": "Вахитовский",
+        "address": "Казань, Петербургская улица, 52",
+        "area_m2": 112,
+        "price_per_m2": 3550,
+        "price_month": 397600,
+        "price_total": null,
+        "floor": 1,
+        "condition": "finish",
+        "power_kw": 35,
+        "separate_entrance": true,
+        "food_ready": true,
+        "line": "1",
+        "footfall": "высокая",
+        "metro": "Площадь Тукая",
+        "fit": "общепит, услуги",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.1236,
+          55.7918
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-005",
+        "title": "Аренда, офис, 74 м²",
+        "deal": "rent",
+        "kind": "office",
+        "district": "Вахитовский",
+        "address": "Казань, улица Пушкина, 18",
+        "area_m2": 74,
+        "price_per_m2": 2200,
+        "price_month": 162800,
+        "price_total": null,
+        "floor": 3,
+        "condition": "finish",
+        "power_kw": 10,
+        "separate_entrance": false,
+        "food_ready": false,
+        "line": "1",
+        "footfall": "средняя",
+        "metro": "Площадь Тукая",
+        "fit": "офис услуг, студия",
+        "office_class": "B+",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.1114,
+          55.7941
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-006",
+        "title": "Продажа, торговое помещение, 81 м²",
+        "deal": "sale",
+        "kind": "street_retail",
+        "district": "Вахитовский",
+        "address": "Казань, улица Островского, 15",
+        "area_m2": 81,
+        "price_per_m2": 314000,
+        "price_month": null,
+        "price_total": 25434000,
+        "floor": 1,
+        "condition": "finish",
+        "power_kw": 22,
+        "separate_entrance": true,
+        "food_ready": true,
+        "line": "1",
+        "footfall": "высокая",
+        "metro": "Кремлёвская",
+        "fit": "пекарня, пункт выдачи",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.1216,
+          55.7824
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-007",
+        "title": "Продажа, торговое помещение, 54 м²",
+        "deal": "sale",
+        "kind": "street_retail",
+        "district": "Вахитовский",
+        "address": "Казань, улица Профсоюзная, 9",
+        "area_m2": 54,
+        "price_per_m2": 445000,
+        "price_month": null,
+        "price_total": 24030000,
+        "floor": 1,
+        "condition": "shell",
+        "power_kw": 15,
+        "separate_entrance": true,
+        "food_ready": false,
+        "line": "1",
+        "footfall": "средняя",
+        "metro": "Суконная слобода",
+        "fit": "услуги, небольшой магазин",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.1394,
+          55.8216
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-008",
+        "title": "Аренда, торговое помещение, 86 м²",
+        "deal": "rent",
+        "kind": "street_retail",
+        "district": "Ново-Савиновский",
+        "address": "Казань, улица Чистопольская, 15",
+        "area_m2": 86,
+        "price_per_m2": 2350,
+        "price_month": 202100,
+        "price_total": null,
+        "floor": 1,
+        "condition": "finish",
+        "power_kw": 25,
+        "separate_entrance": true,
+        "food_ready": true,
+        "line": "1",
+        "footfall": "высокая",
+        "metro": "Козья слобода",
+        "fit": "кофейня, пекарня",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.1518,
+          55.8274
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-009",
+        "title": "Аренда, торговое помещение, 128 м²",
+        "deal": "rent",
+        "kind": "street_retail",
+        "district": "Ново-Савиновский",
+        "address": "Казань, проспект Ямашева, 97",
+        "area_m2": 128,
+        "price_per_m2": 2300,
+        "price_month": 294400,
+        "price_total": null,
+        "floor": 1,
+        "condition": "shell",
+        "power_kw": 30,
+        "separate_entrance": true,
+        "food_ready": false,
+        "line": "1",
+        "footfall": "высокая",
+        "metro": "Яшьлек",
+        "fit": "магазин, общепит после ремонта",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.1276,
+          55.8182
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-010",
+        "title": "Аренда, торговое помещение, 54 м²",
+        "deal": "rent",
+        "kind": "street_retail",
+        "district": "Ново-Савиновский",
+        "address": "Казань, улица Четаева, 34",
+        "area_m2": 54,
+        "price_per_m2": 2400,
+        "price_month": 129600,
+        "price_total": null,
+        "floor": 1,
+        "condition": "finish",
+        "power_kw": 18,
+        "separate_entrance": true,
+        "food_ready": true,
+        "line": "1",
+        "footfall": "средняя",
+        "metro": "Козья слобода",
+        "fit": "кофейня, пункт выдачи",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.1072,
+          55.8318
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-011",
+        "title": "Продажа, торговое помещение, 83 м²",
+        "deal": "sale",
+        "kind": "street_retail",
+        "district": "Ново-Савиновский",
+        "address": "Казань, улица Амирхана, 12",
+        "area_m2": 83,
+        "price_per_m2": 378000,
+        "price_month": null,
+        "price_total": 31374000,
+        "floor": 1,
+        "condition": "shell",
+        "power_kw": 20,
+        "separate_entrance": true,
+        "food_ready": false,
+        "line": "1",
+        "footfall": "средняя",
+        "metro": "Яшьлек",
+        "fit": "услуги в новом доме",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.0974,
+          55.8356
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-012",
+        "title": "Продажа, торговое помещение, 72 м²",
+        "deal": "sale",
+        "kind": "street_retail",
+        "district": "Ново-Савиновский",
+        "address": "Казань, улица Мусина, 6",
+        "area_m2": 72,
+        "price_per_m2": 290000,
+        "price_month": null,
+        "price_total": 20880000,
+        "floor": 1,
+        "condition": "shell",
+        "power_kw": 15,
+        "separate_entrance": true,
+        "food_ready": false,
+        "line": "2",
+        "footfall": "низкая",
+        "metro": "Северный вокзал",
+        "fit": "кабинет, небольшая торговля",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.1774,
+          55.7928
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-013",
+        "title": "Аренда, торговое помещение, 78 м²",
+        "deal": "rent",
+        "kind": "street_retail",
+        "district": "Советский",
+        "address": "Казань, улица Николая Ершова, 29",
+        "area_m2": 78,
+        "price_per_m2": 2200,
+        "price_month": 171600,
+        "price_total": null,
+        "floor": 1,
+        "condition": "finish",
+        "power_kw": 28,
+        "separate_entrance": true,
+        "food_ready": true,
+        "line": "1",
+        "footfall": "высокая",
+        "metro": "Аметьево",
+        "fit": "кофейня у жилых домов",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.1986,
+          55.8164
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-014",
+        "title": "Аренда, торговое помещение, 146 м²",
+        "deal": "rent",
+        "kind": "street_retail",
+        "district": "Советский",
+        "address": "Казань, Сибирский тракт, 22",
+        "area_m2": 146,
+        "price_per_m2": 2050,
+        "price_month": 299300,
+        "price_total": null,
+        "floor": 1,
+        "condition": "finish",
+        "power_kw": 40,
+        "separate_entrance": true,
+        "food_ready": true,
+        "line": "1",
+        "footfall": "средняя",
+        "metro": "",
+        "fit": "столовая, магазин у тракта",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.1672,
+          55.8236
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-015",
+        "title": "Продажа, торговое помещение, 90 м²",
+        "deal": "sale",
+        "kind": "street_retail",
+        "district": "Советский",
+        "address": "Казань, улица Гвардейская, 48",
+        "area_m2": 90,
+        "price_per_m2": 254000,
+        "price_month": null,
+        "price_total": 22860000,
+        "floor": 1,
+        "condition": "finish",
+        "power_kw": 20,
+        "separate_entrance": true,
+        "food_ready": true,
+        "line": "1",
+        "footfall": "средняя",
+        "metro": "",
+        "fit": "пекарня, салон",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.1542,
+          55.7848
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-016",
+        "title": "Аренда, офис, 120 м²",
+        "deal": "rent",
+        "kind": "office",
+        "district": "Советский",
+        "address": "Казань, улица Патриса Лумумбы, 11",
+        "area_m2": 120,
+        "price_per_m2": 1150,
+        "price_month": 138000,
+        "price_total": null,
+        "floor": 4,
+        "condition": "finish",
+        "power_kw": 12,
+        "separate_entrance": false,
+        "food_ready": false,
+        "line": "1",
+        "footfall": "низкая",
+        "metro": "Суконная слобода",
+        "fit": "офис",
+        "office_class": "B",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.1874,
+          55.7596
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-017",
+        "title": "Аренда, торговое помещение, 92 м²",
+        "deal": "rent",
+        "kind": "street_retail",
+        "district": "Приволжский",
+        "address": "Казань, улица Рихарда Зорге, 66",
+        "area_m2": 92,
+        "price_per_m2": 2050,
+        "price_month": 188600,
+        "price_total": null,
+        "floor": 1,
+        "condition": "finish",
+        "power_kw": 25,
+        "separate_entrance": true,
+        "food_ready": true,
+        "line": "1",
+        "footfall": "высокая",
+        "metro": "Горки",
+        "fit": "кофейня, пункт выдачи",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.2076,
+          55.7482
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-018",
+        "title": "Аренда, торговое помещение, 168 м²",
+        "deal": "rent",
+        "kind": "street_retail",
+        "district": "Приволжский",
+        "address": "Казань, проспект Победы, 58",
+        "area_m2": 168,
+        "price_per_m2": 1650,
+        "price_month": 277200,
+        "price_total": null,
+        "floor": 1,
+        "condition": "finish",
+        "power_kw": 35,
+        "separate_entrance": true,
+        "food_ready": true,
+        "line": "1",
+        "footfall": "высокая",
+        "metro": "Проспект Победы",
+        "fit": "магазин, общепит",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.1848,
+          55.7434
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-019",
+        "title": "Продажа, торговое помещение, 84 м²",
+        "deal": "sale",
+        "kind": "street_retail",
+        "district": "Приволжский",
+        "address": "Казань, улица Академика Парина, 7",
+        "area_m2": 84,
+        "price_per_m2": 299000,
+        "price_month": null,
+        "price_total": 25116000,
+        "floor": 1,
+        "condition": "shell",
+        "power_kw": 18,
+        "separate_entrance": true,
+        "food_ready": false,
+        "line": "1",
+        "footfall": "средняя",
+        "metro": "Горки",
+        "fit": "услуги в новом доме",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.0614,
+          55.8238
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-020",
+        "title": "Аренда, торговое помещение, 70 м²",
+        "deal": "rent",
+        "kind": "street_retail",
+        "district": "Московский",
+        "address": "Казань, улица Декабристов, 120",
+        "area_m2": 70,
+        "price_per_m2": 1700,
+        "price_month": 119000,
+        "price_total": null,
+        "floor": 1,
+        "condition": "finish",
+        "power_kw": 20,
+        "separate_entrance": true,
+        "food_ready": true,
+        "line": "1",
+        "footfall": "средняя",
+        "metro": "Яшьлек",
+        "fit": "пекарня, салон",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.0772,
+          55.8276
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-021",
+        "title": "Аренда, торговое помещение, 220 м²",
+        "deal": "rent",
+        "kind": "street_retail",
+        "district": "Московский",
+        "address": "Казань, улица Волкова, 40",
+        "area_m2": 220,
+        "price_per_m2": 1350,
+        "price_month": 297000,
+        "price_total": null,
+        "floor": 1,
+        "condition": "finish",
+        "power_kw": 40,
+        "separate_entrance": true,
+        "food_ready": false,
+        "line": "1",
+        "footfall": "средняя",
+        "metro": "Северный вокзал",
+        "fit": "магазин у дома",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.0446,
+          55.8114
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-022",
+        "title": "Аренда, торговое помещение, 88 м²",
+        "deal": "rent",
+        "kind": "street_retail",
+        "district": "Кировский",
+        "address": "Казань, улица Краснококшайская, 85",
+        "area_m2": 88,
+        "price_per_m2": 1300,
+        "price_month": 114400,
+        "price_total": null,
+        "floor": 1,
+        "condition": "finish",
+        "power_kw": 18,
+        "separate_entrance": true,
+        "food_ready": true,
+        "line": "1",
+        "footfall": "средняя",
+        "metro": "",
+        "fit": "кафе, продукты",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          48.9984,
+          55.8016
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-023",
+        "title": "Продажа, торговое помещение, 62 м²",
+        "deal": "sale",
+        "kind": "street_retail",
+        "district": "Кировский",
+        "address": "Казань, улица Большая Крыловка, 15",
+        "area_m2": 62,
+        "price_per_m2": 160000,
+        "price_month": null,
+        "price_total": 9920000,
+        "floor": 1,
+        "condition": "finish",
+        "power_kw": 15,
+        "separate_entrance": true,
+        "food_ready": true,
+        "line": "1",
+        "footfall": "низкая",
+        "metro": "",
+        "fit": "небольшой общепит",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.0946,
+          55.8618
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-024",
+        "title": "Аренда, торговое помещение, 96 м²",
+        "deal": "rent",
+        "kind": "street_retail",
+        "district": "Авиастроительный",
+        "address": "Казань, улица Копылова, 12",
+        "area_m2": 96,
+        "price_per_m2": 1150,
+        "price_month": 110400,
+        "price_total": null,
+        "floor": 1,
+        "condition": "finish",
+        "power_kw": 20,
+        "separate_entrance": true,
+        "food_ready": true,
+        "line": "1",
+        "footfall": "средняя",
+        "metro": "Авиастроительная",
+        "fit": "кофейня, пункт выдачи",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.1018,
+          55.8546
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-025",
+        "title": "Аренда, торговое помещение, 58 м²",
+        "deal": "rent",
+        "kind": "street_retail",
+        "district": "Авиастроительный",
+        "address": "Казань, Ленинградская улица, 22",
+        "area_m2": 58,
+        "price_per_m2": 850,
+        "price_month": 49300,
+        "price_total": null,
+        "floor": 1,
+        "condition": "finish",
+        "power_kw": 15,
+        "separate_entrance": true,
+        "food_ready": false,
+        "line": "2",
+        "footfall": "низкая",
+        "metro": "Авиастроительная",
+        "fit": "услуги, кабинет",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.0776,
+          55.8672
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-026",
+        "title": "Продажа, торговое помещение, 80 м²",
+        "deal": "sale",
+        "kind": "street_retail",
+        "district": "Авиастроительный",
+        "address": "Казань, Беломорская улица, 4",
+        "area_m2": 80,
+        "price_per_m2": 146000,
+        "price_month": null,
+        "price_total": 11680000,
+        "floor": 1,
+        "condition": "finish",
+        "power_kw": 18,
+        "separate_entrance": true,
+        "food_ready": true,
+        "line": "1",
+        "footfall": "средняя",
+        "metro": "Авиастроительная",
+        "fit": "магазин у дома",
+        "office_class": "",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.1488,
+          55.8194
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-027",
+        "title": "Аренда, офис, 160 м²",
+        "deal": "rent",
+        "kind": "office",
+        "district": "Ново-Савиновский",
+        "address": "Казань, улица Чистопольская, 44",
+        "area_m2": 160,
+        "price_per_m2": 1200,
+        "price_month": 192000,
+        "price_total": null,
+        "floor": 6,
+        "condition": "finish",
+        "power_kw": 15,
+        "separate_entrance": false,
+        "food_ready": false,
+        "line": "1",
+        "footfall": "низкая",
+        "metro": "Козья слобода",
+        "fit": "офис",
+        "office_class": "B",
+        "warehouse_class": "",
+        "ceiling_m": "",
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.1624,
+          55.7368
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-028",
+        "title": "Аренда, склад, 480 м²",
+        "deal": "rent",
+        "kind": "warehouse",
+        "district": "Приволжский",
+        "address": "Казань, улица Тэцевская, 9",
+        "area_m2": 480,
+        "price_per_m2": 730,
+        "price_month": 350400,
+        "price_total": null,
+        "floor": 1,
+        "condition": "finish",
+        "power_kw": 80,
+        "separate_entrance": true,
+        "food_ready": false,
+        "line": "1",
+        "footfall": "низкая",
+        "metro": "",
+        "fit": "склад, лёгкое производство",
+        "office_class": "",
+        "warehouse_class": "B",
+        "ceiling_m": 6,
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          49.2314,
+          55.7512
+        ]
+      },
+      "properties": {
+        "id": "sim-kzn-029",
+        "title": "Аренда, склад, 1200 м²",
+        "deal": "rent",
+        "kind": "warehouse",
+        "district": "Приволжский",
+        "address": "Казань, Оренбургский тракт, 158",
+        "area_m2": 1200,
+        "price_per_m2": 1450,
+        "price_month": 1740000,
+        "price_total": null,
+        "floor": 1,
+        "condition": "finish",
+        "power_kw": 150,
+        "separate_entrance": true,
+        "food_ready": false,
+        "line": "1",
+        "footfall": "низкая",
+        "metro": "",
+        "fit": "склад класса A",
+        "office_class": "",
+        "warehouse_class": "A",
+        "ceiling_m": 12,
+        "data_origin": "simulated",
+        "price_basis": "model_q1_2026_published_averages",
+        "notice": "СИМУЛЯЦИЯ. Вымышленные объявления для MVP. Это не выгрузка Авито, ЦИАН или Росреестра. Ставки подогнаны к опубликованным средним по Казани на март 2026 года."
+      }
+    }
+  ]
+}

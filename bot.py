@@ -13,20 +13,10 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+from envfile import ENV_PATH, load_env
+
 BASE_URL = "https://platform-api2.max.ru"
 ROOT = Path(__file__).resolve().parent
-ENV_PATH = ROOT / ".env"
-
-
-def load_env(path: Path) -> None:
-    if not path.exists():
-        return
-    for line in path.read_text().splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line:
-            continue
-        key, value = line.split("=", 1)
-        os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
 
 
 def ssl_context() -> ssl.SSLContext:
