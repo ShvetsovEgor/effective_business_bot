@@ -22,7 +22,9 @@
   <style>
     * { box-sizing: border-box; }
     html, body { margin: 0; height: 100%; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1d2330; }
-    #app { display: flex; height: 100%; }
+    #app { display: flex; height: 100%; transform-origin: 16% 12%; transition: transform .75s cubic-bezier(.22,.8,.2,1); }
+    body:has(#intro:not(.leaving)) #app { transform: scale(1.035); }
+    body.intro-flying #panel textarea { opacity: 0; }
     #panel { width: 420px; flex: none; height: 100%; overflow: auto; background: #edeef2; }
     #panel .sidebar-field,
     #panel .sidebar-field textarea { display: block; width: 100%; max-width: 100%; box-sizing: border-box; }
@@ -54,17 +56,37 @@
     #intro {
       position: fixed; inset: 0; z-index: 3000;
       display: flex; align-items: center; justify-content: center;
+    }
+    #intro.leaving { pointer-events: none; }
+    .intro-bg {
+      position: absolute; inset: 0;
       background: radial-gradient(125% 125% at 50% 101%,
         rgba(245,87,2,1) 10.5%, rgba(245,120,2,1) 16%, rgba(245,140,2,1) 17.5%,
         rgba(245,170,100,1) 25%, rgba(238,174,202,1) 40%, rgba(202,179,214,1) 65%,
         rgba(148,201,233,1) 100%);
-      transition: opacity .6s ease;
+      transition: opacity .62s ease;
     }
-    #intro.leaving { opacity: 0; pointer-events: none; }
-    .intro-wrap { width: 520px; max-width: calc(100vw - 32px); padding: 16px; transition: transform .55s cubic-bezier(.4,0,.2,1), opacity .5s ease; }
-    #intro.leaving .intro-wrap { transform: translateY(-28px) scale(.96); opacity: 0; }
+    #intro.leaving .intro-bg { opacity: 0; }
+    .intro-wrap { position: relative; width: 520px; max-width: calc(100vw - 32px); padding: 16px; }
+    .intro-title, .intro-sub { transition: opacity .4s ease, transform .55s cubic-bezier(.4,0,.2,1); }
+    #intro.leaving .intro-title,
+    #intro.leaving .intro-sub { opacity: 0; transform: translate(-36px, -20px); }
     .intro-title { color: #fff; text-align: center; font-size: 26px; font-weight: 700; margin: 0 0 6px; text-shadow: 0 2px 16px rgba(0,0,0,.25); }
     .intro-sub { color: rgba(255,255,255,.85); text-align: center; font-size: 14px; margin: 0 0 18px; text-shadow: 0 1px 8px rgba(0,0,0,.2); }
+    .pbox.flying {
+      position: fixed; z-index: 4000; margin: 0; overflow: hidden;
+      transition:
+        left .82s cubic-bezier(.32,.72,.2,1),
+        top .82s cubic-bezier(.32,.72,.2,1),
+        width .82s cubic-bezier(.32,.72,.2,1),
+        height .82s cubic-bezier(.32,.72,.2,1),
+        background-color .82s ease,
+        border-color .82s ease,
+        border-radius .82s ease,
+        box-shadow .82s ease;
+    }
+    .pbox.flying .pbox-actions { opacity: 0; transition: opacity .16s ease; pointer-events: none; }
+    .pbox.flying textarea { transition: color .72s ease; }
     .pbox {
       border-radius: 24px; border: 1px solid #444444; background: #1F2023; padding: 8px;
       box-shadow: 0 8px 30px rgba(0,0,0,.24); transition: border-color .3s ease;
@@ -130,6 +152,7 @@
 </head>
 <body>
 <div id="intro">
+  <div class="intro-bg"></div>
   <div class="intro-wrap">
     <h2 class="intro-title">Где открыть бизнес в Казани</h2>
     <p class="intro-sub">Опишите формат, бюджет, площадь и районы — подберём места на карте</p>
@@ -257,10 +280,44 @@
     refreshSend();
   }
 
+  function fieldPaint(node) {
+    let current = node;
+    while (current && current !== document.body) {
+      const color = getComputedStyle(current).backgroundColor;
+      if (color && color !== "transparent" && color !== "rgba(0, 0, 0, 0)") return color;
+      current = current.parentElement;
+    }
+    return "#ffffff";
+  }
+
   function submitIntro() {
     const text = ptext.value.trim();
-    if (!text || recording) return;
+    if (!text || recording || intro.classList.contains("leaving")) return;
     intro.classList.add("leaving");
+    document.body.classList.add("intro-flying");
+
+    const from = pbox.getBoundingClientRect();
+    const target = document.querySelector("#panel textarea");
+    const measured = target ? target.getBoundingClientRect() : null;
+    const to = measured && measured.width > 40 ? measured : { left: 16, top: 148, width: 388, height: 132 };
+    pbox.style.left = from.left + "px";
+    pbox.style.top = from.top + "px";
+    pbox.style.width = from.width + "px";
+    pbox.style.height = from.height + "px";
+    pbox.style.transition = "none";
+    pbox.classList.add("flying");
+    void pbox.offsetWidth;
+    pbox.style.transition = "";
+    pbox.style.left = to.left + "px";
+    pbox.style.top = to.top + "px";
+    pbox.style.width = to.width + "px";
+    pbox.style.height = to.height + "px";
+    pbox.style.backgroundColor = target ? fieldPaint(target) : "#ffffff";
+    pbox.style.borderColor = "transparent";
+    pbox.style.borderRadius = target ? (getComputedStyle(target).borderRadius || "16px") : "16px";
+    pbox.style.boxShadow = "none";
+    ptext.style.color = target ? getComputedStyle(target).color : "#1d2330";
+
     const started = Date.now();
     const handoff = () => {
       if (window.businessPanel) {
@@ -269,7 +326,10 @@
       }
       if (Date.now() - started < 10000) setTimeout(handoff, 50);
     };
-    setTimeout(() => intro.remove(), 620);
+    setTimeout(() => {
+      intro.remove();
+      document.body.classList.remove("intro-flying");
+    }, 880);
     handoff();
   }
 
