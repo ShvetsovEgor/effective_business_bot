@@ -1,12 +1,14 @@
 """Финансовая модель точки: проходимость × конверсия × чек против аренды.
 
 Все коэффициенты — допущения для MVP, не отраслевая статистика.
-Проходимость берётся из модели `footfall`, аренда и цена — из модельных
-объявлений `commercial_sim`. Для покупки ежемесячная стоимость помещения
+Проходимость берётся из модели `footfall`, аренда — из объявлений Авито.
+Для покупки ежемесячная стоимость помещения
 считается как 1 % цены: доход, который принёс бы тот же капитал под 12 % годовых.
 """
 
 from __future__ import annotations
+
+import math
 
 PEDESTRIANS_MIN = 300
 PEDESTRIANS_MAX = 15_000
@@ -32,6 +34,58 @@ PROFILES = {
     "pickup_point": {"capture": 0.015, "capacity_m2": 6.0, "check": 60, "margin": 1.00, "opex_base": 90_000, "opex_m2": 300, "fitout_m2": 8_000},
     "other": {"capture": 0.006, "capacity_m2": 2.0, "check": 800, "margin": 0.50, "opex_base": 180_000, "opex_m2": 800, "fitout_m2": 20_000},
 }
+# Больше этой площади формат не обслуживает: лишние метры не добавляют покупателей.
+FORMAT_AREA_M2 = {
+    "coffee": 100,
+    "bakery": 100,
+    "fast_food": 120,
+    "pickup_point": 80,
+    "cafe": 160,
+    "bar": 180,
+    "services": 150,
+    "retail": 200,
+    "restaurant": 350,
+    "other": 200,
+}
+
+
+def format_area(brief: dict) -> float | None:
+    """Сколько метров формат вообще может занять. Склад не ограничиваем."""
+    if brief.get("premises") == "warehouse":
+        return None
+    if brief.get("premises") == "office":
+        return 400
+    return FORMAT_AREA_M2.get(brief.get("category") or "")
+
+
+def useful_area(brief: dict) -> float | None:
+    """Площадь, с которой считаются посетители: не больше формата и запроса."""
+    cap = format_area(brief)
+    stated = brief.get("area_max_m2")
+    if cap is None:
+        return float(stated) if stated else None
+    if stated:
+        return min(float(stated), cap)
+    return cap
+
+
+def area_ceiling(brief: dict) -> float | None:
+    """Жёсткий потолок объявления. Формат не даёт протащить зал в разы больше нужного."""
+    cap = format_area(brief)
+    stated = brief.get("area_max_m2")
+    if cap is None:
+        return float(stated) if stated else None
+    if stated:
+        return min(float(stated) * 1.1, cap * 1.15)
+    return cap
+
+
+def traffic_score(pedestrians: int) -> float:
+    """Поток с насыщением: 10 тысяч уже живая улица, площадь на 97 тысяч не в пять раз лучше."""
+    if pedestrians <= 0:
+        return 0.0
+    span = math.log10(97_000 / 1_500)
+    return max(0.0, min(1.0, math.log10(pedestrians / 1_500) / span))
 
 
 def daily_pedestrians(index: float) -> int:
@@ -41,11 +95,12 @@ def daily_pedestrians(index: float) -> int:
 def competition_factor(pedestrians: int, competitors: float) -> float:
     """Доля спроса, которая остаётся новой точке.
 
-    Давление — число прямых конкурентов на 1000 прохожих в день. В людном
-    месте десять кофеен мешают меньше, чем три в спальном квартале.
+    Гексагон — целый квартал, а не один вход. Точка выдерживает примерно
+    одного прямого конкурента на 8 000 прохожих. Десять кофеен у площади
+    забирают спрос сильнее, чем пустая улица с меньшим, но живым потоком.
     """
-    pressure = competitors / max(1.0, pedestrians / 1000)
-    return max(0.2, 1 / (1 + 0.35 * pressure))
+    room = max(1.5, pedestrians / 8_000)
+    return max(0.12, 1 / (1 + competitors / room))
 
 
 def estimate(
@@ -63,11 +118,15 @@ def estimate(
         access *= 0.6
     if offer["floor"] > 1:
         access *= 0.4
-    if not offer["separate_entrance"]:
+    if offer.get("separate_entrance") is False:
         access *= 0.75
     competition = competition_factor(pedestrians, competitors)
     demand = pedestrians * profile["capture"] * access * competition
-    capacity = profile["capacity_m2"] * offer["area_m2"]
+    selling = offer["area_m2"]
+    useful = useful_area(brief)
+    if useful:
+        selling = min(selling, useful)
+    capacity = profile["capacity_m2"] * selling
     visitors = min(demand, capacity)
     check = brief.get("avg_check_rub") or profile["check"] * SEGMENT_CHECK[brief["price_segment"]]
     revenue = visitors * check * 30
@@ -94,7 +153,7 @@ def estimate(
         "capex": round(capex),
         "payback_months": round(capex / profit, 1) if profit > 0 else None,
         "occupancy_share": round(occupancy / revenue, 3) if revenue else None,
-        "rent_per_1000_pedestrians": round(occupancy / (pedestrians * 30 / 1000)),
+        "rent_per_1000_pedestrians": round(occupancy / (pedestrians * 30 / 1000)) if pedestrians else None,
         "assumptions": {
             "capture": profile["capture"],
             "access_factor": round(access, 2),

@@ -3,7 +3,7 @@
 Запуск: `python -m yandex_map.server`, страница http://127.0.0.1:8766/.
 
 - `GET /api/heat` — тепловая карта модельной проходимости; пока модель строится, `status=building`;
-- `GET /api/offers` — модельные объявления;
+- `GET /api/offers` — объявления аренды с Авито;
 - `POST /api/analyze` `{"text": "..."}` — разбор описания, конкуренты и топ-5;
 - `POST /api/insight` `{"brief": {...}, "place": {...}}` — новости района и вывод по месту.
 
@@ -28,8 +28,8 @@ if str(ROOT) not in sys.path:
 from analysis import footfall
 from analysis.insight import district_insight
 from analysis.ranking import analyze
-from commercial_sim.kazan import NOTICE as OFFERS_NOTICE
-from commercial_sim.kazan import build_records
+from commercial_sim.avito import NOTICE as OFFERS_NOTICE
+from commercial_sim.avito import offers as build_records
 
 STATIC_DIR = Path(__file__).resolve().parent
 PAGE = STATIC_DIR / "index.html"

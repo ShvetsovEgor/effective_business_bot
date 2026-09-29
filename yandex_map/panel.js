@@ -37,7 +37,7 @@ legend.onAdd = () => {
   const box = L.DomUtil.create("div", "legend");
   box.innerHTML = `
     <div><b>Тепловая карта</b> — пешеходы в сутки по гексагонам Яндекс Геоаналитики</div>
-    <div><i style="background:#9aa3af"></i>модельные объявления (симуляция)</div>
+    <div><i style="background:#9aa3af"></i>объявления Авито</div>
     <div><i style="background:#1f6feb"></i>топ-5 мест</div>
     <div><i class="org-swatch"></i>конкуренты из Яндекса</div>`;
   return box;
@@ -200,7 +200,7 @@ function DetailCard({ place, insight, onClose }) {
   const shownVerdict = insight?.verdict?.verdict || place.verdict;
   const competition = place.competition;
   const nearby = Object.entries(place.footfall.nearby).map(([name, count]) => `${name}: ${Number(count).toLocaleString("ru-RU")}`).join(", ");
-  const scores = `Поток ${Math.round(place.scores.footfall * 100)} · экономика ${Math.round(place.scores.finance * 100)} · конкуренция ${Math.round(place.scores.competition * 100)} · соответствие ${Math.round(place.scores.fit * 100)}`;
+  const scores = `Поток ${Math.round(place.scores.footfall * 100)} · без конкурентов ${Math.round(place.scores.competition * 100)} · экономика ${Math.round(place.scores.finance * 100)} · соответствие ${Math.round(place.scores.fit * 100)}`;
   return html`
     <${MaxUI} platform="ios" colorScheme="light">
       <${Panel} mode="primary">
@@ -217,6 +217,7 @@ function DetailCard({ place, insight, onClose }) {
             overline=${`Балл ${Math.round(place.scores.total * 100)}`}
             before=${html`<${RankAvatar} rank=${place.rank} />`}
             after=${html`<${Verdict} value=${shownVerdict} />`} />
+          ${place.url ? html`<${CellSimple} height="compact" title="Объявление на Авито" link=${place.url} showChevron />` : null}
           <${CellSimple} height="compact" title=${scores} />
           ${place.flags.length ? html`<${CellSimple} height="compact" overline="Оговорки" title=${place.flags.join("; ")} />` : null}
           <${CellHeader}>Финансовая модель<//>
@@ -238,6 +239,27 @@ function DetailCard({ place, insight, onClose }) {
           <${InsightBlock} insight=${insight} open=${insightOpen} newsOpen=${newsOpen} onToggle=${() => setInsightOpen((value) => !value)} onToggleNews=${() => setNewsOpen((value) => !value)} />
         <//>
       <//>
+    <//>
+  `;
+}
+
+function OtherOffers({ places, onOpen }) {
+  const [open, setOpen] = useState(false);
+  if (!places?.length) return null;
+  return html`
+    <${CellList} mode="island" filled>
+      <${CellAction} mode="secondary" showChevron onClick=${() => setOpen((value) => !value)}>
+        Другие предложения · ${places.length}
+      <//>
+      ${open ? places.map((place) => html`
+        <${CellSimple}
+          key=${place.id}
+          height="compact"
+          overline=${String(place.rank)}
+          title=${place.title}
+          subtitle=${`${place.address} · ${place.area_m2} м² · ${rub(place.price_month)}/мес`}
+          onClick=${() => onOpen(place)} />
+      `) : null}
     <//>
   `;
 }
@@ -314,6 +336,16 @@ function App() {
     showCompetitors(place);
   }
 
+  function focusOther(place) {
+    setActiveId(null);
+    competitorLayer.clearLayers();
+    map.flyTo([place.lat, place.lon], 16, { duration: 0.6 });
+    L.popup({ offset: [0, -8] })
+      .setLatLng([place.lat, place.lon])
+      .setContent(`<b>${esc(place.title)}</b><br>${esc(place.address)}<br>${place.area_m2} м² · ${rub(place.price_month)}/мес${place.url ? `<br><a href="${esc(place.url)}" target="_blank" rel="noreferrer">Объявление на Авито</a>` : ""}`)
+      .openOn(map);
+  }
+
   function closeDetail() {
     setActiveId(null);
     competitorLayer.clearLayers();
@@ -361,7 +393,7 @@ function App() {
       for (const offer of body.offers) {
         const price = offer.deal === "rent" ? `${rub(offer.price_month)}/мес` : rub(offer.price_total);
         L.circleMarker([offer.lat, offer.lon], { radius: 5, color: "#6b7280", fillColor: "#9aa3af", fillOpacity: 0.8, weight: 1 })
-          .bindPopup(`<b>${esc(offer.title)}</b><br>${esc(offer.address)}<br>${price}<br><span class="muted">Симуляция объявления</span>`)
+          .bindPopup(`<b>${esc(offer.title)}</b><br>${esc(offer.address)}<br>${price}<br><a href="${esc(offer.url)}" target="_blank" rel="noreferrer">Объявление на Авито</a>`)
           .addTo(offersLayer);
       }
     }
@@ -443,6 +475,7 @@ function App() {
                 insight=${insights[place.id]}
                 onOpen=${focusPlace} />
             `)}
+            <${OtherOffers} places=${payload.others || []} onOpen=${focusOther} />
             ${activePlace && detailRoot ? createPortal(html`
               <${DetailCard}
                 key=${activePlace.id}
