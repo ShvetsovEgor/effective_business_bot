@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Казань — подбор места под бизнес</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.css">
+  <link rel="stylesheet" href="https://unpkg.com/@maxhub/max-ui@0.5.0/dist/styles.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react@19.2.8",
+      "react/jsx-runtime": "https://esm.sh/react@19.2.8/jsx-runtime",
+      "react-dom": "https://esm.sh/react-dom@19.2.8",
+      "react-dom/client": "https://esm.sh/react-dom@19.2.8/client",
+      "htm/react": "https://esm.sh/htm@3.1.1/react?external=react",
+      "@maxhub/max-ui": "https://unpkg.com/@maxhub/max-ui@0.5.0/dist/index.js"
+    }
+  }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; font: 14px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #1d2330; }
+    #app { display: flex; height: 100%; transform-origin: 16% 12%; transition: transform .75s cubic-bezier(.22,.8,.2,1); }
+    body:has(#intro:not(.leaving)) #app { transform: scale(1.035); }
+    body.intro-flying #panel textarea { opacity: 0; }
+    #panel { width: 420px; flex: none; height: 100%; overflow: auto; background: #edeef2; }
+    #panel .sidebar-field,
+    #panel .sidebar-field textarea { display: block; width: 100%; max-width: 100%; box-sizing: border-box; }
+    #map { flex: 1; }
+    .muted { color: #667085; font-size: 12px; }
+    .place-card.active [class*="CellList__body"] { background-color: #d6e8ff; }
+    #detail {
+      position: fixed; top: 16px; right: 16px; bottom: 16px; width: 400px;
+      max-width: min(400px, calc(100vw - 32px)); z-index: 900; overflow: auto;
+      border-radius: 20px; box-shadow: 0 16px 48px rgba(0,0,0,.22);
+      background: var(--background-surface, #edeef2);
+    }
+    #detail:empty { display: none; }
+    .legend { background: #fff; padding: 8px 10px; border-radius: 8px; box-shadow: 0 4px 16px rgba(0,0,0,.12); font-size: 12px; max-width: 260px; }
+    .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; }
+    .num-icon { background: #1f6feb; color: #fff; border: 2px solid #fff; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-weight: 700; box-shadow: 0 2px 8px rgba(0,0,0,.35); }
+    .org-icon {
+      box-sizing: border-box; width: 32px; height: 32px; border-radius: 50%;
+      background: #fff; color: #9f1239; border: 3px solid #e11d48;
+      display: flex; align-items: center; justify-content: center;
+      font: 700 12px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      box-shadow: 0 0 0 2px #fff, 0 2px 8px rgba(0,0,0,.45);
+    }
+    .org-icon.chain { background: #e11d48; color: #fff; }
+    .legend i.org-swatch { background: #fff; border: 2px solid #e11d48; box-sizing: border-box; }
+    .leaflet-control-attribution { max-width: 320px; font-size: 11px; }
+
+    /* ---- Первый экран: prompt box на градиенте ---- */
+    #intro {
+      position: fixed; inset: 0; z-index: 3000;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #intro.leaving { pointer-events: none; }
+    .intro-bg {
+      position: absolute; inset: 0;
+      background: radial-gradient(125% 125% at 50% 101%,
+        rgba(245,87,2,1) 10.5%, rgba(245,120,2,1) 16%, rgba(245,140,2,1) 17.5%,
+        rgba(245,170,100,1) 25%, rgba(238,174,202,1) 40%, rgba(202,179,214,1) 65%,
+        rgba(148,201,233,1) 100%);
+      transition: opacity .62s ease;
+    }
+    #intro.leaving .intro-bg { opacity: 0; }
+    .intro-wrap { position: relative; width: 520px; max-width: calc(100vw - 32px); padding: 16px; }
+    .intro-user, .intro-title, .intro-sub { transition: opacity .4s ease, transform .55s cubic-bezier(.4,0,.2,1); }
+    #intro.leaving .intro-user,
+    #intro.leaving .intro-title,
+    #intro.leaving .intro-sub { opacity: 0; transform: translate(-36px, -20px); }
+    .intro-user { color: #fff; text-align: center; font-size: 15px; font-weight: 600; margin: 0 0 10px; text-shadow: 0 1px 8px rgba(0,0,0,.25); }
+    .intro-user[hidden] { display: none; }
+    .intro-title { color: #fff; text-align: center; font-size: 26px; font-weight: 700; margin: 0 0 6px; text-shadow: 0 2px 16px rgba(0,0,0,.25); }
+    .intro-sub { color: rgba(255,255,255,.85); text-align: center; font-size: 14px; margin: 0 0 18px; text-shadow: 0 1px 8px rgba(0,0,0,.2); }
+    .pbox.flying {
+      position: fixed; z-index: 4000; margin: 0; overflow: hidden;
+      transition:
+        left .82s cubic-bezier(.32,.72,.2,1),
+        top .82s cubic-bezier(.32,.72,.2,1),
+        width .82s cubic-bezier(.32,.72,.2,1),
+        height .82s cubic-bezier(.32,.72,.2,1),
+        background-color .82s ease,
+        border-color .82s ease,
+        border-radius .82s ease,
+        box-shadow .82s ease;
+    }
+    .pbox.flying .pbox-actions { opacity: 0; transition: opacity .16s ease; pointer-events: none; }
+    .pbox.flying textarea { transition: color .72s ease; }
+    .pbox {
+      border-radius: 24px; border: 1px solid #444444; background: #1F2023; padding: 8px;
+      box-shadow: 0 8px 30px rgba(0,0,0,.24); transition: border-color .3s ease;
+    }
+    .pbox.recording { border-color: rgba(239,68,68,.7); }
+    .pbox textarea {
+      display: block; width: 100%; border: 0; background: transparent; color: #f3f4f6;
+      font: inherit; font-size: 16px; line-height: 1.45; padding: 10px 12px;
+      min-height: 44px; max-height: 240px; resize: none; outline: none;
+    }
+    .pbox textarea::placeholder { color: #9ca3af; }
+    .pbox textarea::-webkit-scrollbar { width: 6px; }
+    .pbox textarea::-webkit-scrollbar-thumb { background: #444; border-radius: 3px; }
+    .pbox.recording .pmain { display: none; }
+    .pbox-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 4px 4px; }
+    .pbox.recording .pleft { display: none; }
+    .pleft { display: flex; align-items: center; gap: 2px; }
+    .picon {
+      height: 32px; width: 32px; padding: 0; border-radius: 50%; border: 0; background: transparent;
+      display: flex; align-items: center; justify-content: center; color: #9CA3AF; cursor: pointer; transition: .2s;
+    }
+    .picon:hover { background: rgba(75,85,99,.3); color: #D1D5DB; }
+    .picon svg { width: 20px; height: 20px; }
+    .ptoggle {
+      height: 32px; border-radius: 999px; display: flex; align-items: center; gap: 4px;
+      padding: 4px 8px; border: 1px solid transparent; background: transparent;
+      color: #9CA3AF; cursor: pointer; transition: all .25s ease; font: inherit;
+    }
+    .ptoggle svg { width: 16px; height: 16px; transition: transform .35s cubic-bezier(.34,1.56,.64,1); }
+    .ptoggle:hover { color: #D1D5DB; }
+    .ptoggle:hover svg { transform: rotate(15deg) scale(1.1); }
+    .ptoggle.on svg { transform: rotate(360deg) scale(1.1); }
+    .ptoggle .lbl { max-width: 0; overflow: hidden; white-space: nowrap; font-size: 12px; opacity: 0; transition: max-width .25s ease, opacity .2s ease; }
+    .ptoggle.on .lbl { max-width: 72px; opacity: 1; }
+    .t-search.on { background: rgba(30,174,219,.15); border-color: #1EAEDB; color: #1EAEDB; }
+    .t-think.on { background: rgba(139,92,246,.15); border-color: #8B5CF6; color: #8B5CF6; }
+    .t-canvas.on { background: rgba(249,115,22,.15); border-color: #F97316; color: #F97316; }
+    .pdivider { height: 24px; width: 1.5px; margin: 0 4px; border-radius: 999px; background: linear-gradient(to top, transparent, rgba(155,135,245,.7), transparent); }
+    .psend {
+      height: 32px; width: 32px; padding: 0; border-radius: 50%; border: 0; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      background: transparent; color: #9CA3AF; transition: all .2s ease;
+    }
+    .psend:hover { background: rgba(75,85,99,.3); color: #D1D5DB; }
+    .psend.has { background: #fff; color: #1F2023; }
+    .psend.has:hover { background: rgba(255,255,255,.8); }
+    .psend.rec { background: transparent; color: #ef4444; }
+    .psend svg { width: 18px; height: 18px; }
+    .psend .i-arrow, .psend .i-stop { display: none; }
+    .psend.has .i-arrow { display: block; }
+    .psend.has .i-mic { display: none; }
+    .psend.rec .i-stop { display: block; }
+    .psend.rec .i-mic, .psend.rec .i-arrow { display: none; }
+    .precorder { display: none; flex-direction: column; align-items: center; padding: 12px 0 4px; }
+    .pbox.recording .precorder { display: flex; }
+    .prec-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+    .prec-dot { height: 8px; width: 8px; border-radius: 50%; background: #ef4444; animation: ppulse 1s ease-in-out infinite; }
+    .prec-time { font-family: ui-monospace, monospace; font-size: 13px; color: rgba(255,255,255,.8); }
+    .prec-bars { display: flex; align-items: center; justify-content: center; gap: 2px; height: 40px; width: 100%; padding: 0 16px; }
+    .prec-bars span { width: 2px; border-radius: 999px; background: rgba(255,255,255,.5); animation: ppulse ease-in-out infinite; }
+    @keyframes ppulse { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+  </style>
+</head>
+<body>
+<div id="intro">
+  <div class="intro-bg"></div>
+  <div class="intro-wrap">
+    <p class="intro-user" id="intro-user" hidden></p>
+    <h2 class="intro-title">Где открыть бизнес в Казани</h2>
+    <p class="intro-sub">Опишите формат, бюджет, площадь и районы — подберём места на карте</p>
+    <div class="pbox" id="pbox">
+      <div class="pmain">
+        <textarea id="ptext" rows="1" placeholder="Опишите бизнес: формат, бюджет, площадь, районы…"></textarea>
+      </div>
+      <div class="precorder">
+        <div class="prec-head"><span class="prec-dot"></span><span class="prec-time" id="prec-time">00:00</span></div>
+        <div class="prec-bars" id="prec-bars"></div>
+      </div>
+      <div class="pbox-actions">
+        <div class="pleft">
+          <button type="button" class="picon" id="pattach" title="Прикрепить изображение"><i data-lucide="paperclip"></i></button>
+          <button type="button" class="ptoggle t-search" id="tsearch" title="Поиск по новостям района"><i data-lucide="globe"></i><span class="lbl">Поиск</span></button>
+          <div class="pdivider"></div>
+          <button type="button" class="ptoggle t-think" id="tthink" title="Глубокий анализ"><i data-lucide="brain-cog"></i><span class="lbl">Анализ</span></button>
+          <div class="pdivider"></div>
+          <button type="button" class="ptoggle t-canvas" id="tcanvas" title="Показать на карте"><i data-lucide="map"></i><span class="lbl">Карта</span></button>
+        </div>
+        <button type="button" class="psend" id="psend" title="Отправить">
+          <span class="i-mic"><i data-lucide="mic"></i></span>
+          <span class="i-arrow"><i data-lucide="arrow-up"></i></span>
+          <span class="i-stop"><i data-lucide="stop-circle"></i></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="app">
+  <aside id="panel"></aside>
+  <div id="map"></div>
+  <aside id="detail"></aside>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/maplibre-gl@5/dist/maplibre-gl.js"></script>
+<script src="https://unpkg.com/@maplibre/maplibre-gl-leaflet/leaflet-maplibre-gl.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<script type="module" src="/panel.js?v=gap"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://st.max.ru/js/max-web-app.js"></script>
+<script>
+  lucide.createIcons();
+
+  const intro = document.getElementById("intro");
+  const pbox = document.getElementById("pbox");
+  const ptext = document.getElementById("ptext");
+  const psend = document.getElementById("psend");
+  const precTime = document.getElementById("prec-time");
+  const precBars = document.getElementById("prec-bars");
+  let recording = false;
+  let recTimer = null;
+
+  const PLACEHOLDERS = {
+    none: "Опишите бизнес: формат, бюджет, площадь, районы…",
+    search: "Поиск по новостям района…",
+    think: "Глубокий анализ локации…",
+    canvas: "Показать локации на карте…",
+  };
+
+  function autoresize() {
+    ptext.style.height = "auto";
+    ptext.style.height = Math.min(ptext.scrollHeight, 240) + "px";
+  }
+
+  function refreshSend() {
+    psend.classList.toggle("has", !recording && ptext.value.trim() !== "");
+    psend.classList.toggle("rec", recording);
+    psend.title = recording ? "Остановить запись" : ptext.value.trim() ? "Отправить" : "Голосовое сообщение";
+  }
+
+  ptext.addEventListener("input", () => { autoresize(); refreshSend(); });
+  ptext.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      submitIntro();
+    }
+  });
+
+  const toggles = { tsearch: "search", tthink: "think", tcanvas: "canvas" };
+  for (const [id, mode] of Object.entries(toggles)) {
+    document.getElementById(id).addEventListener("click", () => {
+      const button = document.getElementById(id);
+      const isOn = button.classList.toggle("on");
+      if (mode === "search" && isOn) document.getElementById("tthink").classList.remove("on");
+      if (mode === "think" && isOn) document.getElementById("tsearch").classList.remove("on");
+      const active = ["search", "think", "canvas"].find((name) =>
+        document.getElementById("t" + name).classList.contains("on"));
+      ptext.placeholder = PLACEHOLDERS[active || "none"];
+    });
+  }
+
+  document.getElementById("pattach").addEventListener("click", () => {
+    ptext.placeholder = "Вложения в этой версии не участвуют в анализе — опишите бизнес текстом";
+    ptext.focus();
+  });
+
+  function startRecording() {
+    recording = true;
+    pbox.classList.add("recording");
+    precBars.innerHTML = "";
+    for (let i = 0; i < 32; i++) {
+      const bar = document.createElement("span");
+      bar.style.height = Math.max(15, Math.random() * 100) + "%";
+      bar.style.animationDelay = (i * 0.05).toFixed(2) + "s";
+      bar.style.animationDuration = (0.5 + Math.random() * 0.5).toFixed(2) + "s";
+      precBars.appendChild(bar);
+    }
+    let seconds = 0;
+    precTime.textContent = "00:00";
+    recTimer = setInterval(() => {
+      seconds += 1;
+      const mins = String(Math.floor(seconds / 60)).padStart(2, "0");
+      const secs = String(seconds % 60).padStart(2, "0");
+      precTime.textContent = `${mins}:${secs}`;
+    }, 1000);
+    refreshSend();
+  }
+
+  function stopRecording() {
+    recording = false;
+    pbox.classList.remove("recording");
+    if (recTimer) clearInterval(recTimer);
+    ptext.placeholder = "Голосовой ввод в этой версии не распознаётся — опишите бизнес текстом";
+    ptext.focus();
+    refreshSend();
+  }
+
+  function fieldPaint(node) {
+    let current = node;
+    while (current && current !== document.body) {
+      const color = getComputedStyle(current).backgroundColor;
+      if (color && color !== "transparent" && color !== "rgba(0, 0, 0, 0)") return color;
+      current = current.parentElement;
+    }
+    return "#ffffff";
+  }
+
+  function submitIntro() {
+    const text = ptext.value.trim();
+    if (!text || recording || intro.classList.contains("leaving")) return;
+    intro.classList.add("leaving");
+    document.body.classList.add("intro-flying");
+
+    const from = pbox.getBoundingClientRect();
+    const target = document.querySelector("#panel textarea");
+    const measured = target ? target.getBoundingClientRect() : null;
+    const to = measured && measured.width > 40 ? measured : { left: 16, top: 148, width: 388, height: 132 };
+    pbox.style.left = from.left + "px";
+    pbox.style.top = from.top + "px";
+    pbox.style.width = from.width + "px";
+    pbox.style.height = from.height + "px";
+    pbox.style.transition = "none";
+    pbox.classList.add("flying");
+    void pbox.offsetWidth;
+    pbox.style.transition = "";
+    pbox.style.left = to.left + "px";
+    pbox.style.top = to.top + "px";
+    pbox.style.width = to.width + "px";
+    pbox.style.height = to.height + "px";
+    pbox.style.backgroundColor = target ? fieldPaint(target) : "#ffffff";
+    pbox.style.borderColor = "transparent";
+    pbox.style.borderRadius = target ? (getComputedStyle(target).borderRadius || "16px") : "16px";
+    pbox.style.boxShadow = "none";
+    ptext.style.color = target ? getComputedStyle(target).color : "#1d2330";
+
+    const started = Date.now();
+    const handoff = () => {
+      if (window.businessPanel) {
+        window.businessPanel.submit(text);
+        return;
+      }
+      if (Date.now() - started < 10000) setTimeout(handoff, 50);
+    };
+    setTimeout(() => {
+      intro.remove();
+      document.body.classList.remove("intro-flying");
+    }, 880);
+    handoff();
+  }
+
+  psend.addEventListener("click", () => {
+    if (recording) stopRecording();
+    else if (ptext.value.trim()) submitIntro();
+    else startRecording();
+  });
+
+  function maxUserName() {
+    const user = window.WebApp && window.WebApp.initDataUnsafe && window.WebApp.initDataUnsafe.user;
+    if (!user) return "";
+    const full = [user.first_name, user.last_name].map((part) => (part || "").trim()).filter(Boolean).join(" ");
+    return full || (user.username || "").trim();
+  }
+
+  function showMaxUser() {
+    try {
+      if (window.WebApp && typeof window.WebApp.ready === "function") window.WebApp.ready();
+    } catch (error) {
+      console.warn(error);
+    }
+    const name = maxUserName();
+    const node = document.getElementById("intro-user");
+    if (!name || !node) return;
+    node.textContent = `Здравствуйте, ${name}`;
+    node.hidden = false;
+  }
+
+  refreshSend();
+  showMaxUser();
+  ptext.focus();
+</script>
+</body>
+</html>

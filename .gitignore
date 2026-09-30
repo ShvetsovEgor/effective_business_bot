@@ -1,4 +1,12 @@
 .env
+ssh-key*
+id_rsa*
+id_ed25519*
+*.key
+*.ppk
+.env.*
+!.env.example
+*.tar.gz
 __pycache__/
 *.pyc
 .venv/
@@ -6,9 +14,9 @@ node_modules/
 dist/
 coverage/
 .tools/
-/data/
+/data/*
+!/data/simulated/
+!/data/templates/
 *.sqlite*
 *.db*
-.env.*
-!.env.example
 *.log

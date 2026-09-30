@@ -1,0 +1,40 @@
+services:
+  web:
+    build: .
+    ports:
+      - "80:80"
+    env_file:
+      - .env
+    environment:
+      HOST: 0.0.0.0
+      PORT: "80"
+    restart: unless-stopped
+
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile.bot
+    env_file:
+      - .env
+    environment:
+      DATABASE_PATH: /app/data/bot.sqlite
+      CHECKPOINT_PATH: /app/data/checkpoints.sqlite
+      DOCUMENTS_PATH: /app/templates
+      NODE_EXTRA_CA_CERTS: /app/certs/russian_trusted_root_ca.pem
+    volumes:
+      - bot-data:/app/data
+    profiles:
+      - bot
+    restart: unless-stopped
+
+  bot-legacy:
+    build: .
+    command: ["python", "-u", "bot.py"]
+    env_file:
+      - .env
+    profiles:
+      - legacy-bot
+    restart: unless-stopped
+
+volumes:
+  bot-data:

@@ -1,0 +1,5 @@
+requests>=2.32
+h3>=4.0
+folium>=0.17
+openai>=1.68
+yandex-ai-studio-sdk>=0.22
