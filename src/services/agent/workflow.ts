@@ -36,6 +36,7 @@ export class Workflow {
     }
     const reviewedMarket=action==='confirm-change'&&s.detail==='market-facts'?s.marketAnalysis:null;
     if(action==='menu') s.detail='menu';
+    else if(action==='premises') s.detail='premises';
     else if(action==='reset') s.detail='reset';
     else if(action==='cancel'||action==='resume') {
       if(!wasHelp||action==='cancel'){
@@ -159,7 +160,8 @@ export class Workflow {
     if(s.helpScreen)screen=s.helpScreen;
     else if(s.pendingChange) screen={text:`Сохранить эти данные?\n\n${labels(s.pendingChange)}`,buttons:[button('Подтвердить','confirm-change'),button('Отмена','cancel')]};
     else if(s.detail==='reset') screen={text:'Удалить профиль, задачи и весь прогресс? Это действие нельзя отменить.',buttons:[button('Удалить мои данные','reset-confirm'),button('Отмена','cancel')]};
-    else if(s.detail==='menu') screen={text:'Что нужно сделать сейчас? Можно также написать вопрос обычным текстом.',buttons:[button('Продолжить маршрут','resume'),button('ООО уже зарегистрировано','registered'),button('Налоговый режим','tax'),button('Мои задачи','tasks'),button('Мой профиль','profile'),button('Документы','documents'),button('Задать вопрос','help')]};
+    else if(s.detail==='menu') screen={text:'Что нужно сделать сейчас? Можно также написать вопрос обычным текстом.',buttons:[button('Продолжить маршрут','resume'),button('ООО уже зарегистрировано','registered'),button('Налоговый режим','tax'),button('Мои задачи','tasks'),button('Мой профиль','profile'),button('Документы','documents'),button('📍 Подобрать помещение','premises'),button('Задать вопрос','help')]};
+    else if(s.detail==='premises') screen={text:'📍 БизнесСтарт — помещение для вашего бизнеса\n\nНаш сайт помогает выбрать место в аренду в вашем городе под ваш бизнес. Перейдите на БизнесСтарт, чтобы подобрать подходящее помещение.',buttons:[{text:'Перейти на БизнесСтарт',url:'https://бизнестарт.рф/'},button('Вернуться в главное меню','menu')]};
     else if(s.detail==='profile') screen={text:labels(p)||'Профиль пока пуст.',buttons:[button('Изменить данные','edit'),button('Продолжить','resume'),nav]};
     else if(s.editing&&s.detail?.startsWith('edit-field:')&&s.pendingQuestion) {
       const q=questions[s.pendingQuestion]!;
