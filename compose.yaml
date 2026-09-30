@@ -21,10 +21,10 @@ services:
       CHECKPOINT_PATH: /app/data/checkpoints.sqlite
       DOCUMENTS_PATH: /app/templates
       NODE_EXTRA_CA_CERTS: /app/certs/russian_trusted_root_ca.pem
+      YANDEX_CLOUD_API_TOKEN: ${YANDEX_AI_STUDIO_API_KEY}
+      YANDEX_CLOUD_FOLDER_ID: ${YANDEX_CLOUD_FOLDER_ID:-b1gv2rfr13cpst5o42jr}
     volumes:
       - bot-data:/app/data
-    profiles:
-      - bot
     restart: unless-stopped
 
   bot-legacy:

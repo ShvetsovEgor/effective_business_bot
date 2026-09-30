@@ -35,7 +35,7 @@
 
 ## Запуск в Docker
 
-Команда ниже запускает только сайт. Для запуска сайта и основного TypeScript-бота вместе используйте `docker compose --profile bot up --build -d`, как описано в [README.md](README.md).
+Команда ниже поднимает сайт и основной TypeScript-бот. Общая инструкция — в [README.md](README.md).
 
 ```bash
 docker compose up --build
