@@ -11,7 +11,7 @@ import { type WorkflowState, type GraphInput } from '../../graph/state.js';
 import { nextStage } from '../../graph/routing.js';
 import { taskList } from './task-screens.js';
 import { helpScreen, helpForId, isHelpRequest } from './help.js';
-import { documentScreen, documentPath } from '../document-catalog.js';
+import { documentScreen, documentPath, documentButton } from '../document-catalog.js';
 import { documents } from '../../data/documents.js';
 import type { Button, Screen } from '../../bot/messages/types.js';
 import { BusinessMemory } from './memory.js';
@@ -160,9 +160,9 @@ export class Workflow {
     if(s.helpScreen)screen=s.helpScreen;
     else if(s.pendingChange) screen={text:`Сохранить эти данные?\n\n${labels(s.pendingChange)}`,buttons:[button('Подтвердить','confirm-change'),button('Отмена','cancel')]};
     else if(s.detail==='reset') screen={text:'Удалить профиль, задачи и весь прогресс? Это действие нельзя отменить.',buttons:[button('Удалить мои данные','reset-confirm'),button('Отмена','cancel')]};
-    else if(s.detail==='menu') screen={text:'Что нужно сделать сейчас? Можно также написать вопрос обычным текстом.',buttons:[button('Продолжить маршрут','resume'),button('ООО уже зарегистрировано','registered'),button('Налоговый режим','tax'),button('Мои задачи','tasks'),button('Мой профиль','profile'),button('Документы','documents'),button('📍 Подобрать помещение','premises'),button('Задать вопрос','help')]};
+    else if(s.detail==='menu') screen={text:'Что нужно сделать сейчас? Можно также написать вопрос обычным текстом.',buttons:[button('▶️ Продолжить маршрут','resume'),button('🏢 ООО уже зарегистрировано','registered'),button('💰 Налоговый режим','tax'),button('👤 Мой профиль','profile'),button('📍 Подобрать помещение','premises'),button('❓ Задать вопрос','help')]};
     else if(s.detail==='premises') screen={text:'📍 БизнесСтарт — помещение для вашего бизнеса\n\nНаш сайт помогает выбрать место в аренду в вашем городе под ваш бизнес. Перейдите на БизнесСтарт, чтобы подобрать подходящее помещение.',buttons:[{text:'Перейти на БизнесСтарт',url:'https://бизнестарт.рф/'},button('Вернуться в главное меню','menu')]};
-    else if(s.detail==='profile') screen={text:labels(p)||'Профиль пока пуст.',buttons:[button('Изменить данные','edit'),button('Продолжить','resume'),nav]};
+    else if(s.detail==='profile') screen={text:labels(p)||'Профиль пока пуст.',buttons:[button('Мои задачи','tasks'),button('Документы','documents'),button('Изменить данные','edit'),button('Продолжить','resume'),nav]};
     else if(s.editing&&s.detail?.startsWith('edit-field:')&&s.pendingQuestion) {
       const q=questions[s.pendingQuestion]!;
       screen={text:`Новое значение\n${q.text}`,buttons:[...(q.options??[]).map(([label,value])=>button(label,`answer:${value}`)),button('Отмена','cancel')]};
@@ -243,14 +243,14 @@ export class Workflow {
         screen.text+='\nЗадача сохранена в архиве; сейчас правило не применяется.';
         screen.buttons=screen.buttons.filter(b=>!('action'in b)||!b.action.startsWith('status:')&&!b.action.startsWith('done:'));
       }
-      screen.buttons.push(...documents.filter(d=>d.taskIds.includes(id)).map(d=>button(d.title,`document:${d.id}`)));
+      screen.buttons.push(...documents.filter(d=>d.taskIds.includes(id)).map(documentButton));
     }
     if(!s.detail&&s.currentStage==='REGISTRATION'){
       const id=this.memory.repo.tasks(s.threadId).find(t=>t.group==='registration'&&t.status!=='DONE')?.id;
-      screen.buttons.push(...documents.filter(d=>d.taskIds.includes(id??'')).map(d=>button(d.title,`document:${d.id}`)));
+      screen.buttons.push(...documents.filter(d=>d.taskIds.includes(id??'')).map(documentButton));
     }
     if(s.currentStage==='DASHBOARD'&&!s.detail&&!s.helpScreen)screen.buttons.push(button('Выполненные задачи','completed:0'),button('Продолжить маршрут','resume'));
-    if(!s.helpScreen)screen.buttons.push(button('Задать вопрос','help'));
+    if(!s.helpScreen&&!screen.buttons.some(b=>'action'in b&&b.action==='help'))screen.buttons.push(button('Задать вопрос','help'));
     const nonce=randomUUID().slice(0,8);
     s.screen={...screen,text:`${s.notice?s.notice+'\n\n':''}${screen.text}`,buttons:screen.buttons.map(b=>'action'in b?{...b,action:`${nonce}|${b.action}`}:b)};
     return s;

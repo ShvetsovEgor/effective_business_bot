@@ -17,8 +17,8 @@ it('approved local document sends once per request and unknown paths cannot be r
  const send=vi.spyOn(bot.api,'sendMessageToUser').mockResolvedValue(msg);
  try{
  expect(documentScreen('r11001').text).toContain('ещё не загружен');
- writeFileSync(join(root,'r11001.pdf'),'test fixture, not a legal document');
- expect(documentPath('../../.env')).toBeNull();expect(documentPath('r11001')).toBe(join(root,'r11001.pdf'));
+ writeFileSync(join(root,'R11001.pdf'),'test fixture, not a legal document');
+ expect(documentPath('../../.env')).toBeNull();expect(documentPath('r11001')).toBe(join(root,'R11001.pdf'));
  const deliver=createDocumentDelivery(repo);const screen={text:'Файл',buttons:[{text:'Назад',action:'nonce|resume'}],documentId:'r11001'};
  await deliver(ctx,1,screen);await deliver(ctx,1,screen);
  expect(upload).toHaveBeenCalledTimes(1);expect(send).toHaveBeenCalledTimes(1);expect(send.mock.calls[0]?.[2]?.attachments?.[0]?.type).toBe('file');
