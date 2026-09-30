@@ -19,6 +19,7 @@ export function invalidate(s:WorkflowState,patch:BusinessProfile): WorkflowState
 export function syncObligations(repo:Repository,thread:string,p:BusinessProfile) {
   if(p.legalForm!=='LLC') {repo.db.prepare('UPDATE tasks SET active=0 WHERE user_id=?').run(thread);return;}
   if(p.registrationStatus!=='REGISTERED'||missing('POST_REGISTRATION',p).some(key=>key!=='taxRegime')) return;
+  repo.db.prepare("UPDATE tasks SET active=0 WHERE user_id=? AND task_group='registration' AND status<>'DONE'").run(thread);
   const rules=afterRegistrationRules({name:p.businessName!,registration_date:p.registrationDate!,region:p.region!,tax_regime:p.taxRegime??'unknown',employees:p.employeesCount!,director:p.directorEmployed!,personal_data:p.processesPersonalData!,cash_register:p.needsCashRegister!,personnel_event:p.personnelEvent!});
   repo.syncTasks(thread,rules,p.registrationDate,true);
   if(p.bankAccountOpened&&repo.tasks(thread).find(t=>t.id==='bank')?.status!=='DONE') repo.setStatus(thread,'bank','DONE');

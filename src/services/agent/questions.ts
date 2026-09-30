@@ -13,7 +13,7 @@ export function required(stage: Stage, p: BusinessProfile): ProfileField[] {
   if(stage==='NICHE') return ['businessIdea'];
   if(stage==='LEGAL_FORM') return ['legalForm'];
   if(stage==='TAX_REGIME') return p.legalForm==='IP'?[]:['legalForm',...tax];
-  if(stage==='BUSINESS_PLAN'&&p.legalForm==='IP') return ['expectedAnnualRevenue','expectedAnnualExpenses','annualPayroll'];
+  if(stage==='BUSINESS_PLAN') return ['expectedAnnualRevenue','expectedAnnualExpenses','annualPayroll'];
   if(stage==='REGISTRATION') return p.registrationStatus==='REGISTERED'?['registrationDate']:[];
   if(stage==='BANK_ACCOUNT') return ['bankAccountOpened'];
   if(stage==='POST_REGISTRATION') return ['businessName','registrationDate','region','taxRegime','employeesCount','directorEmployed','processesPersonalData','needsCashRegister','personnelEvent'];

@@ -36,9 +36,11 @@ it('unknown model keys are rejected and deterministic 420000 is immutable',()=>{
 });
 it('AI unavailable: calculator and buttons work, duplicate task callback is harmless',async()=>{
  const {repo,navigator}=setup();try{
- navigator.memory.seed('max:1:1','1');navigator.memory.save('max:1:1',full);
+ navigator.memory.seed('max:1:1','1');navigator.memory.save('max:1:1',{...full,businessIdea:'Мастерская'});
  let screen=await navigator.handle('1',{type:'command',command:'menu'},'1');screen=await navigator.handle('1',action(screen,'tax'),'2');expect(screen.text).toContain('420');
- screen=await navigator.handle('1',action(screen,'choose:usn-income'),'3');screen=await navigator.handle('1',action(screen,'continue'),'4');
+ screen=await navigator.handle('1',action(screen,'choose:usn-income'),'3');
+ expect((await navigator.state('1'))?.currentStage).toBe('NICHE');
+ for(const eventId of ['4a','4b','4c','4d'])screen=await navigator.handle('1',action(screen,'continue'),eventId);
  const done=action(screen,'done:reg-1');screen=await navigator.handle('1',done,'5');expect(screen.text).toContain('Шаг 2');
  expect((await navigator.handle('1',done,'6')).text).toContain('Шаг 2');expect((await navigator.handle('1',done,'5')).text).toContain('Шаг 2');
  expect(repo.tasks('max:1:1').filter(t=>t.status==='DONE')).toHaveLength(1);expect(repo.tasks('max:1:1')).toHaveLength(10);
@@ -79,18 +81,23 @@ it('complete LLC demo, confirmed filing, personal tasks, reset and preserved typ
  const click=async(value:string)=>{screen=await navigator.handle('1',action(screen,value),String(++id));};
  const say=async(text:string)=>{screen=await navigator.handle('1',{type:'text',text},String(++id));};
  await say('Мастерская мебели');await click('continue');expect(screen.text).toContain('Предварительный анализ');await click('continue');await click('answer:LLC');await click('continue');
- for(const value of ['16','7000000','4000000','1000000','3','0','0'])await say(value);
+ expect((await navigator.state('1'))?.currentStage).toBe('BUSINESS_PLAN');
+ for(const value of ['7000000','4000000','1000000'])await say(value);
+ await click('continue');
+ for(const value of ['16','3','0','0'])await say(value);
  for(let n=0;n<3;n++)await click('answer:yes');
- await click('choose:usn-income');expect(screen.text).toContain('2');await click('continue');
+ await click('choose:usn-income');expect(screen.text).toContain('итоговый план');await click('plan-confirm');
  for(let n=1;n<=8;n++)await click(`done:reg-${n}`);
  await click('done:reg-9');expect(screen.text).toContain('самостоятельно подали');await click('done:reg-9');await click('done:reg-10');
- await click('answer:no');await click('bank-opened');await say('Мебель');await say('31.01.2026');
+ expect((await navigator.state('1'))?.currentStage).toBe('POST_REGISTRATION');
+ await say('Мебель');await say('31.01.2026');
  // Region, employees and tax regime were already supplied: they must be skipped.
  expect((await navigator.state('1'))?.pendingQuestion).toBe('directorEmployed');
  await click('answer:yes');await click('answer:yes');await click('answer:no');await click('answer:no');
  expect((await navigator.state('1'))?.currentStage).toBe('DASHBOARD');
  const tasks=repo.tasks('max:1:1');expect(tasks.find(t=>t.id==='capital')?.deadline).toBe('2026-05-31');expect(tasks.some(t=>t.id==='efs')).toBe(false);expect(tasks.some(t=>t.id==='privacy')).toBe(true);expect(tasks.some(t=>t.id==='military')).toBe(true);
- await click('all:0');expect(screen.text).toContain('Все задачи');
+ expect(tasks.find(t=>t.id==='bank')?.status).toBe('TODO');
+ await click('all:0');expect(screen.text).toContain('Все активные задачи');
  screen=await navigator.handle('1',{type:'command',command:'reset'},String(++id));await click('reset-confirm');expect(navigator.memory.read('max:1:1').profile).toEqual({});expect(repo.tasks('max:1:1')).toHaveLength(0);expect((await navigator.state('1'))?.currentStage).toBe('NICHE');
  }finally{navigator.close();repo.close();}
 });

@@ -3,14 +3,17 @@ import { setTimeout as delay } from 'node:timers/promises';
 import type { Repository } from '../../db/repository.js';
 import type { Screen } from './types.js';
 import { keyboard } from '../keyboards/index.js';
+import { createDocumentDelivery } from './documents.js';
 
 export function createDelivery(repo: Repository) {
+  const sendDocument=createDocumentDelivery(repo);
   const lastMutation = new Map<string, number>();
   const throttle = async (user: string) => {
     await delay(Math.max(0, 550 - (Date.now() - (lastMutation.get(user) ?? 0))));
     lastMutation.set(user, Date.now());
   };
   return async (ctx: Context, userId: number, screen: Screen, cleanHistory: boolean, belowUser = false) => {
+    try {await sendDocument(ctx,userId,screen);}catch{screen={...screen,text:screen.text+'\nНе удалось отправить файл. Попробуйте «Получить файл» ещё раз или откройте официальный источник.'};}
     const user = String(userId);
     const state = repo.botScreen(user);
     const callbackMessage = ctx.callback && ctx.message?.sender?.is_bot ? ctx.message.body.mid : undefined;
@@ -36,7 +39,7 @@ export function createDelivery(repo: Repository) {
     if (cleanHistory && ctx.chatId && ctx.botInfo) {
       try {
         const history = await ctx.api.getMessages(ctx.chatId, { count: 100 });
-        state.pending.push(...history.messages.filter(m => m.sender?.user_id === ctx.botInfo!.user_id).map(m => m.body.mid));
+        state.pending.push(...history.messages.filter(m => m.sender?.user_id === ctx.botInfo!.user_id&&!m.body.attachments?.some(a=>a.type==='file')).map(m => m.body.mid));
       } catch { /* History may be unavailable; the active screen still works. */ }
     }
     state.pending = [...new Set(state.pending)].filter(id => id !== state.messageId);

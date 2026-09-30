@@ -107,8 +107,8 @@ export class Repository {
       deadline(rule.deadline_rule, date), rule.deadline_rule.type, rule.source_url, rule.why_it_matters,
       rule.source_url, rule.verified_at, rule.group, index, JSON.stringify(rule)));
   }
-  tasks(id: string): Task[] {
-    const rows = this.db.prepare('SELECT data,status,completion_date,deadline FROM tasks WHERE user_id=? AND active=1 ORDER BY task_group,position,id').all(id) as TaskRow[];
+  tasks(id: string, includeInactive=false): Task[] {
+    const rows = this.db.prepare(`SELECT data,status,completion_date,deadline FROM tasks WHERE user_id=? ${includeInactive?'':'AND active=1'} ORDER BY task_group,position,id`).all(id) as TaskRow[];
     return rows.map(row => {
       const rule = JSON.parse(row.data) as TaskRule;
       return { ...rule, status: row.status, completion_date: row.completion_date, deadline: row.deadline,
@@ -127,6 +127,7 @@ export class Repository {
     return row ? { input: JSON.parse(row.input) as TaxInput, result: JSON.parse(row.result) as TaxResult[] } : null;
   }
   reset(id: string) {
+    if(this.db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='document_deliveries'").get())this.db.prepare('DELETE FROM document_deliveries WHERE user_id=?').run(id);
     this.db.prepare('DELETE FROM users WHERE id=?').run(id);
     this.ensureUser(id);
   }

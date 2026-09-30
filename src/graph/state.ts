@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { ProfileSchema, ProfileFieldSchema } from '../domain/business/profile.js';
 
-export const stages = ['NICHE', 'MARKET_ANALYSIS', 'LEGAL_FORM', 'TAX_REGIME', 'BUSINESS_PLAN', 'REGISTRATION', 'BANK_ACCOUNT', 'POST_REGISTRATION', 'DASHBOARD'] as const;
+export const stages = ['NICHE', 'MARKET_ANALYSIS', 'LEGAL_FORM', 'BUSINESS_PLAN', 'TAX_REGIME', 'REGISTRATION', 'POST_REGISTRATION', 'DASHBOARD', 'BANK_ACCOUNT'] as const;
 export const StageSchema = z.enum(stages);
 export type Stage = z.infer<typeof StageSchema>;
 export const InputSchema = z.strictObject({ id: z.string(), text: z.string().max(4000).optional(), action: z.string().max(200).optional() });
@@ -13,12 +13,13 @@ export const MarketSchema = z.strictObject({
 });
 export type MarketAnalysis = z.infer<typeof MarketSchema>;
 const TaxResultSchema=z.strictObject({id:z.enum(['usn-income','usn-profit','ausn-income','ausn-profit','osno']),name:z.string(),eligibility:z.strictObject({available:z.boolean(),confirmed:z.boolean(),reasons:z.array(z.string())}),tax:z.number().finite(),contributions:z.number().finite().nullable(),total:z.number().finite(),complete:z.boolean(),formula:z.string(),warnings:z.array(z.string()),source_url:z.string().url()});
-const ScreenSchema=z.strictObject({text:z.string(),buttons:z.array(z.union([z.strictObject({text:z.string(),action:z.string()}),z.strictObject({text:z.string(),url:z.string().url()})]))});
+const ScreenSchema=z.strictObject({text:z.string(),buttons:z.array(z.union([z.strictObject({text:z.string(),action:z.string()}),z.strictObject({text:z.string(),url:z.string().url()})])),documentId:z.string().optional()});
 export const StateSchema = z.strictObject({
   userId: z.string(), chatId: z.string(), threadId: z.string(), currentStage: StageSchema,
   completedStages: z.array(StageSchema), profileVersion: z.number().int(),
   pendingQuestion: ProfileFieldSchema.nullable(), pendingChange: ProfileSchema.nullable(),
   editing: z.boolean(), detail: z.string().nullable(), notice: z.string(),
+  resumeStage: StageSchema.optional(), helpScreen: ScreenSchema.optional(),
   marketAnalysis: MarketSchema.nullable(),
   taxAnalysis: z.array(TaxResultSchema).nullable(),
   businessPlan: z.strictObject({ revenue: z.number(), expenses: z.number(), payroll: z.number(), taxes: z.number().nullable(), profit: z.number().nullable(), complete: z.boolean() }).nullable(),
